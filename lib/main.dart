@@ -1,9 +1,13 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/pages/bottom_nav.dart';
 import 'package:prm393/pages/login.dart';
+import 'package:prm393/pages/onboard.dart';
 import 'package:prm393/pages/sign_up.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -33,7 +37,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SignUp(),
+      home: OnBoard(),
     );
   }
 }
