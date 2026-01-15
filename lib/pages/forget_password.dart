@@ -1,57 +1,37 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/pages/bottom_nav.dart';
-import 'package:prm393/pages/forget_password.dart';
 import 'package:prm393/pages/sign_up.dart';
 import 'package:prm393/widget/widget_support.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class ForgetPassword extends StatefulWidget {
+  const ForgetPassword({super.key});
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _LoginState();
+    return _ForgetPasswordState();
   }
 }
 
-class _LoginState extends State<Login> {
+class _ForgetPasswordState extends State<ForgetPassword> {
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+
   String email = "";
   String password = "";
   final _formKey = GlobalKey<FormState>();
 
-  login() async {
-    if (password.isNotEmpty) {
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-
-              "Login Success",
-              style: TextStyle(color: Colors.white,fontFamily: "Poppins",fontSize: 20),
-            ),
-          ),
-        );
-        Navigator.pushReplacement(
+  forgetPassword() async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Password Reset Email Sent")));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == "user-not-found") {
+        ScaffoldMessenger.of(
           context,
-          MaterialPageRoute(builder: (context) => BottomNav()),
-        );
-      } on FirebaseAuthException catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.redAccent,
-            content: Text(
-              "Invalid Email or Password",
-              style: AppWidget.boldTextFieldStyle(),
-            ),
-          ),
-        );
+        ).showSnackBar(SnackBar(content: Text("User Not Found")));
       }
     }
   }
@@ -120,8 +100,16 @@ class _LoginState extends State<Login> {
                           children: [
                             SizedBox(height: 30),
                             Text(
-                              "Login",
+                              "Password Recovery",
                               style: AppWidget.boldTextFieldStyle(),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              "Enter your email ",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             Container(
                               margin: EdgeInsets.only(left: 20, right: 20),
@@ -141,49 +129,15 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                             SizedBox(height: 30),
-                            Container(
-                              margin: EdgeInsets.only(left: 20, right: 20),
-                              child: TextFormField(
-                                obscureText:true,
-                                controller: passwordController,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return "Please enter your password";
-                                  }
-                                  return null;
-                                },
-                                decoration: InputDecoration(
-                                  hintText: "Password",
-                                  hintStyle: AppWidget.SemiBoldTextFieldStyle(),
-                                  suffixIcon: Icon(Icons.password_rounded),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 30),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(context,  MaterialPageRoute(builder: (context) => ForgetPassword()),);
-                              },
-                              child: Container(
-                                margin: EdgeInsets.only(left: 20, right: 20),
-                                alignment: AlignmentDirectional.topEnd,
-                                child: Text(
-                                  "Forgot Password?",
-                                  style: AppWidget.boldTextFieldStyle(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 100),
+
                             GestureDetector(
                               onTap: () {
                                 if (_formKey.currentState!.validate()) {
                                   setState(() {
                                     email = emailController.text;
-                                    password = passwordController.text;
-
                                   });
                                 }
-                                login();
+                                forgetPassword();
                               },
                               child: Container(
                                 padding: EdgeInsets.only(
@@ -198,7 +152,7 @@ class _LoginState extends State<Login> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  "Login",
+                                  "Send Email",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,

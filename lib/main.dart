@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/pages/bottom_nav.dart';
+import 'package:prm393/pages/forget_password.dart';
 import 'package:prm393/pages/login.dart';
 import 'package:prm393/pages/onboard.dart';
 import 'package:prm393/pages/sign_up.dart';
+import 'package:prm393/pages/wallet.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: OnBoard(),
+      home: Wallet(),
     );
   }
 }
