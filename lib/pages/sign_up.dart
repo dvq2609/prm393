@@ -31,10 +31,10 @@ class _SignUpState extends State<SignUp> {
             .createUserWithEmailAndPassword(email: email, password: password);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.white,
+
             content: Text(
               "Registration Successful",
-              style: AppWidget.boldTextFieldStyle(),
+              style: TextStyle(color: Colors.white,fontFamily: "Poppins",fontSize: 20),
             ),
           ),
         );
@@ -182,8 +182,10 @@ class _SignUpState extends State<SignUp> {
                             ),
                             SizedBox(height: 30),
                             Container(
+
                               margin: EdgeInsets.only(left: 20, right: 20),
                               child: TextFormField(
+                                obscureText: true,
                                 controller: passwordController,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -192,6 +194,7 @@ class _SignUpState extends State<SignUp> {
                                   return null;
                                 },
                                 decoration: InputDecoration(
+
                                   hintText: "Password",
                                   hintStyle: AppWidget.SemiBoldTextFieldStyle(),
                                   suffixIcon: Icon(Icons.password_rounded),
