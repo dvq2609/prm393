@@ -4,6 +4,8 @@ import 'package:prm393/pages/bottom_nav.dart';
 import 'package:prm393/pages/sign_up.dart';
 import 'package:prm393/widget/widget_support.dart';
 
+import 'login.dart';
+
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({super.key});
 
@@ -26,12 +28,12 @@ class _ForgetPasswordState extends State<ForgetPassword> {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Password Reset Email Sent")));
+      ).showSnackBar(SnackBar(content: Text("Kiểm tra email của bạn")));
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("User Not Found")));
+        ).showSnackBar(SnackBar(content: Text("Không tìm thấy người dùng")));
       }
     }
   }
@@ -100,12 +102,12 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                           children: [
                             SizedBox(height: 30),
                             Text(
-                              "Password Recovery",
+                              "Khôi phục mật khẩu",
                               style: AppWidget.boldTextFieldStyle(),
                             ),
                             SizedBox(height: 10),
                             Text(
-                              "Enter your email ",
+                              "Nhập địa chỉ email ",
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -117,7 +119,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                 controller: emailController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "Please enter your email";
+                                    return "Yêu cầu nhập email";
                                   }
                                   return null;
                                 },
@@ -152,7 +154,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  "Send Email",
+                                  "Gửi email",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
@@ -168,17 +170,36 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                   ),
                 ),
                 SizedBox(height: 30),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignUp()),
-                    );
-                  },
-                  child: Text(
-                    "Don't have account? Sign up",
-                    style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
-                  ),
+                Row(
+                  mainAxisAlignment:  MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUp()),
+                        );
+                      },
+                      child: Text(
+                        "Đăng kí",
+                        style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                      ),
+                    ),
+
+                    GestureDetector(
+                      
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
+                      },
+                      child: Text(
+                        "Đăng nhập",
+                        style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
