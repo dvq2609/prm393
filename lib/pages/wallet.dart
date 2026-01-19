@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prm393/services/momo_payment_service.dart';
+import 'package:prm393/services/wallet_service.dart';
 import 'package:prm393/widget/widget_support.dart';
 
 class Wallet extends StatefulWidget {
@@ -10,11 +11,16 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> with WidgetsBindingObserver {
-  int _selectedAmount = 10000; // Default 10,000 VND
+  int _selectedAmount = 10000;
   final MomoPaymentService _momoService = MomoPaymentService();
+  final WalletService _walletService = WalletService();
   bool _isLoading = false;
   String? _currentOrderId;
   String? _currentRequestId;
+  int? _pendingAmount; // Lưu số tiền đang chờ xác nhận
+
+  final TextEditingController _customAmountController = TextEditingController();
+  bool _isCustomAmount = false; // Đánh dấu có dùng số tiền tùy chỉnh không
 
   @override
   void initState() {
@@ -25,6 +31,7 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _customAmountController.dispose();
     super.dispose();
   }
 
@@ -36,51 +43,124 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
   }
 
   Future<void> _checkPaymentStatus() async {
-    if (_currentOrderId == null || _currentRequestId == null) return;
+    print('=== CHECK PAYMENT STATUS ===');
+    print('_currentOrderId: $_currentOrderId');
+    print('_currentRequestId: $_currentRequestId');
+
+    if (_currentOrderId == null || _currentRequestId == null) {
+      print('OrderId or RequestId is null - skipping check');
+      return;
+    }
 
     try {
+      print('Checking payment status...');
       final response = await _momoService.checkStatus(
         orderId: _currentOrderId!,
         requestId: _currentRequestId!,
       );
 
+      print('Response resultCode: ${response.resultCode}');
+      print('Response message: ${response.message}');
+
       if (response.resultCode == 0) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Thanh toán thành công!"),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
+        print('Payment SUCCESS! Adding balance...');
+
+        // Thanh toán thành công - cập nhật số dư
+        final success = await _walletService.addBalance(
+          amount: _pendingAmount ?? _selectedAmount,
+          orderId: _currentOrderId!,
+          transactionId: _currentRequestId!, // Dùng requestId đã lưu
         );
-        // Clear fields to prevent duplicate checks
+
+        print('Balance update success: $success');
+
+        if (!mounted) return;
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Nạp ${(_pendingAmount ?? _selectedAmount) ~/ 1000}k VND thành công!",
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Có lỗi khi cập nhật số dư!"),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+
+        // Clear để tránh check lại
         _currentOrderId = null;
         _currentRequestId = null;
+        _pendingAmount = null;
+      } else if (response.resultCode == 1006) {
+        // User đang thực hiện giao dịch - chờ
+        print("Transaction in progress...");
+        debugPrint("Transaction in progress...");
       } else {
-        // Optional: handle failure silently or show error if user is expecting immediate result
+        print('Payment FAILED! ResultCode: ${response.resultCode}');
+        // Thanh toán thất bại
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Thanh toán thất bại!"),
+          SnackBar(
+            content: Text(
+              "Thanh toán thất bại! Mã lỗi: ${response.resultCode}",
+            ),
             backgroundColor: Colors.redAccent,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
+
+        // Clear
+        _currentOrderId = null;
+        _currentRequestId = null;
+        _pendingAmount = null;
       }
     } catch (e) {
+      print("ERROR checking status: $e");
       debugPrint("Error checking status: $e");
     }
   }
 
   void _handlePayment() async {
+    // Lấy số tiền từ custom input hoặc button đã chọn
+    int amountToPay = _selectedAmount;
+
+    if (_isCustomAmount && _customAmountController.text.isNotEmpty) {
+      final customAmount = int.tryParse(_customAmountController.text.replaceAll(',', ''));
+      if (customAmount == null || customAmount < 1000) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Vui lòng nhập số tiền hợp lệ (tối thiểu 1,000 VND)"),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+      amountToPay = customAmount;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
+    print('=== CREATING PAYMENT ===');
+    print('Amount: $amountToPay');
+
     try {
       final response = await _momoService.createPayment(
-        amount: _selectedAmount,
-        orderInfo: 'Nap tien vi $_selectedAmount VND',
+        amount: amountToPay,
+        orderInfo: 'Nap tien vi $amountToPay VND',
         onStatusUpdate: (status) {
+          print('Status update: $status');
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -92,11 +172,18 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
         },
       );
 
-      // Store IDs for verification when app resumes
+      // Lưu thông tin để verify sau
       _currentOrderId = response.orderId;
       _currentRequestId = response.requestId;
+      _pendingAmount = amountToPay;
+
+      print('Payment created:');
+      print('OrderId: $_currentOrderId');
+      print('RequestId: $_currentRequestId');
+      print('Pending amount: $_pendingAmount');
     } catch (e) {
-      // Error handled in service or already shown
+      print("Payment error: $e");
+      debugPrint("Payment error: $e");
     }
 
     if (mounted) {
@@ -107,11 +194,13 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
   }
 
   Widget _buildAmountButton(int amount) {
-    bool isSelected = _selectedAmount == amount;
+    bool isSelected = _selectedAmount == amount && !_isCustomAmount;
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedAmount = amount;
+          _isCustomAmount = false;
+          _customAmountController.clear();
         });
       },
       child: Container(
@@ -171,12 +260,19 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Your wallet",
+                              "Ví của bạn",
                               style: AppWidget.boldTextFieldStyle(),
                             ),
-                            Text(
-                              "0 VND", // Placeholder balance
-                              style: AppWidget.SemiBoldTextFieldStyle(),
+                            // Sử dụng StreamBuilder để hiển thị số dư realtime
+                            StreamBuilder<int>(
+                              stream: _walletService.getBalanceStream(),
+                              builder: (context, snapshot) {
+                                final balance = snapshot.data ?? 0;
+                                return Text(
+                                  "${balance.toStringAsFixed(0)} VND",
+                                  style: AppWidget.SemiBoldTextFieldStyle(),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -192,7 +288,7 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Add money", style: AppWidget.SemiBoldTextFieldStyle()),
+                  Text("Chọn mệnh giá", style: AppWidget.SemiBoldTextFieldStyle()),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -203,7 +299,65 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
                       _buildAmountButton(100000),
                     ],
                   ),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 20),
+
+                  // Custom amount input
+                  Text(
+                    "Hoặc nhập số tiền khác",
+                    style: AppWidget.SemiBoldTextFieldStyle(),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _customAmountController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(
+                      fontFamily: "Poppins",
+                      fontSize: 16,
+                    ),
+                    decoration: InputDecoration(
+
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontFamily: "Poppins",
+                      ),
+                      suffixText: "VND",
+                      suffixStyle: const TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF009688),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF009688),
+                          width: 2,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      if (value.isNotEmpty) {
+                        setState(() {
+                          _isCustomAmount = true;
+                        });
+                      } else {
+                        setState(() {
+                          _isCustomAmount = false;
+                        });
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 30),
                   GestureDetector(
                     onTap: _isLoading ? null : _handlePayment,
                     child: Container(
