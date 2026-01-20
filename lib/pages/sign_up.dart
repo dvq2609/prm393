@@ -142,7 +142,7 @@ class _SignUpState extends State<SignUp> {
                           children: [
                             SizedBox(height: 30),
                             Text(
-                              "Sign up",
+                              "Đăng kí",
                               style: AppWidget.boldTextFieldStyle(),
                             ),
                             Container(
@@ -150,13 +150,13 @@ class _SignUpState extends State<SignUp> {
                               child: TextFormField(
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Name is required";
+                                    return "Yêu cầu nhập tên";
                                   }
                                   return null;
                                 },
                                 controller: nameController,
                                 decoration: InputDecoration(
-                                  hintText: "Name",
+                                  hintText: "Tên tài khoản",
                                   hintStyle: AppWidget.SemiBoldTextFieldStyle(),
                                   suffixIcon: Icon(Icons.person),
                                 ),
@@ -169,7 +169,7 @@ class _SignUpState extends State<SignUp> {
                                 controller: emailController,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Email is required";
+                                    return "Yêu cầu nhập email";
                                   }
                                   return null;
                                 },
@@ -189,13 +189,13 @@ class _SignUpState extends State<SignUp> {
                                 controller: passwordController,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Password is required";
+                                    return "Yêu cầu nhập mật khẩu";
                                   }
                                   return null;
                                 },
                                 decoration: InputDecoration(
 
-                                  hintText: "Password",
+                                  hintText: "Mật khẩu",
                                   hintStyle: AppWidget.SemiBoldTextFieldStyle(),
                                   suffixIcon: Icon(Icons.password_rounded),
                                 ),
@@ -227,7 +227,7 @@ class _SignUpState extends State<SignUp> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  "Sign Up",
+                                  "Đăng kí",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
@@ -251,7 +251,7 @@ class _SignUpState extends State<SignUp> {
                     );
                   },
                   child: Text(
-                    "Already have account? Sign in",
+                    "Đăng nhập",
                     style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
                   ),
                 ),

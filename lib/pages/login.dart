@@ -31,9 +31,12 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-
-              "Login Success",
-              style: TextStyle(color: Colors.white,fontFamily: "Poppins",fontSize: 20),
+              "Đăng nhập thành công",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: "Poppins",
+                fontSize: 20,
+              ),
             ),
           ),
         );
@@ -47,7 +50,7 @@ class _LoginState extends State<Login> {
           SnackBar(
             backgroundColor: Colors.redAccent,
             content: Text(
-              "Invalid Email or Password",
+              "Sai tài khoản hoặc mật khẩu",
               style: AppWidget.boldTextFieldStyle(),
             ),
           ),
@@ -120,7 +123,7 @@ class _LoginState extends State<Login> {
                           children: [
                             SizedBox(height: 30),
                             Text(
-                              "Login",
+                              "Đăng nhập",
                               style: AppWidget.boldTextFieldStyle(),
                             ),
                             Container(
@@ -129,7 +132,7 @@ class _LoginState extends State<Login> {
                                 controller: emailController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "Please enter your email";
+                                    return "Hãy nhập email của bạn";
                                   }
                                   return null;
                                 },
@@ -144,16 +147,16 @@ class _LoginState extends State<Login> {
                             Container(
                               margin: EdgeInsets.only(left: 20, right: 20),
                               child: TextFormField(
-                                obscureText:true,
+                                obscureText: true,
                                 controller: passwordController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "Please enter your password";
+                                    return "Hãy nhập mật khẩu của bạn";
                                   }
                                   return null;
                                 },
                                 decoration: InputDecoration(
-                                  hintText: "Password",
+                                  hintText: "Mật khẩu",
                                   hintStyle: AppWidget.SemiBoldTextFieldStyle(),
                                   suffixIcon: Icon(Icons.password_rounded),
                                 ),
@@ -162,13 +165,18 @@ class _LoginState extends State<Login> {
                             SizedBox(height: 30),
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(context,  MaterialPageRoute(builder: (context) => ForgetPassword()),);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ForgetPassword(),
+                                  ),
+                                );
                               },
                               child: Container(
                                 margin: EdgeInsets.only(left: 20, right: 20),
                                 alignment: AlignmentDirectional.topEnd,
                                 child: Text(
-                                  "Forgot Password?",
+                                  "Quên mật khẩu?",
                                   style: AppWidget.boldTextFieldStyle(),
                                 ),
                               ),
@@ -180,7 +188,6 @@ class _LoginState extends State<Login> {
                                   setState(() {
                                     email = emailController.text;
                                     password = passwordController.text;
-
                                   });
                                 }
                                 login();
@@ -198,7 +205,7 @@ class _LoginState extends State<Login> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  "Login",
+                                  "Đăng nhập",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
@@ -222,7 +229,7 @@ class _LoginState extends State<Login> {
                     );
                   },
                   child: Text(
-                    "Don't have account? Sign up",
+                    "Đăng kí tài khoản mới",
                     style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
                   ),
                 ),
