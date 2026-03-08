@@ -41,6 +41,9 @@ dependencies:
 
   momo_payment_flutter: ^1.0.2
   url_launcher: ^6.3.2
+  image_picker: ^1.0.4
+  random_string: ^2.3.1
+  firebase_storage: ^13.0.5
 
   
 

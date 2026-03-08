@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:prm393/pages/bottom_nav.dart';
 import 'package:prm393/pages/forget_password.dart';
 import 'package:prm393/pages/sign_up.dart';
+import 'package:prm393/admin/admin_login.dart';
 import 'package:prm393/widget/widget_support.dart';
 
 class Login extends StatefulWidget {
@@ -228,14 +229,38 @@ class _LoginState extends State<Login> {
                       MaterialPageRoute(builder: (context) => SignUp()),
                     );
                   },
-                  child: Text(
-                    "Đăng kí tài khoản mới",
-                    style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                    child: Text(
+                      "Đăng kí tài khoản mới",
+                      style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AdminLogin()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black26),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        "Đăng nhập với tư cách Quản trị viên",
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
         ),
       ),
     );
