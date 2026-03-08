@@ -46,42 +46,51 @@ class _HomeState extends State<Home> {
                       );
                     },
                     child: Container(
-                      margin: EdgeInsets.all(4),
-                      child: Material(
-                        borderRadius: BorderRadius.circular(20),
-                        elevation: 5.0,
-                        child: Container(
-                          padding: EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
+                margin: EdgeInsets.only(right: 20, bottom: 20.0),
+                child: Material(
+                  borderRadius: BorderRadius.circular(20),
+                  elevation: 5,
+                  child: Container(
+                    padding: EdgeInsets.all(5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.network(
                                   ds["Image"],
-                                  height: 150,
-                                  width: 150,
+                                  height: 120,
+                                  width: 120,
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              Text(
-                                ds["Name"],
-                                style: AppWidget.SemiBoldTextFieldStyle(),
-                              ),
-                              Text(
-                                "Fresh and healthy",
-                                style: AppWidget.LightTextFieldStyle(),
-                              ),
-                              SizedBox(height: 3),
-                              Text(
-                                "\$"+ds["Price"],
-                                style: AppWidget.SemiBoldTextFieldStyle(),
-                              ),
-                            ],
-                          ),
+                        SizedBox(width: 20),
+                        Column(
+                          children: [
+                            Container(
+                              width: MediaQuery.of( context).size.width - 200,
+                            child: Text(
+                              ds["Name"],
+                              style: AppWidget.SemiBoldTextFieldStyle(),
+                            )),
+                            SizedBox(height: 5.0),
+                            Container(
+                              width: MediaQuery.of( context).size.width - 200,
+                            child: Text(
+                              "Honey goat cheese",
+                              style: AppWidget.LightTextFieldStyle(),
+                            )),
+                            SizedBox(height: 5.0),
+                            Container(
+                              width: MediaQuery.of( context).size.width - 200,
+                            child: Text("\$" + ds["Price"],style: AppWidget.SemiBoldTextFieldStyle())),
+                          ],
                         ),
-                      ),
+                      ],
                     ),
+                )
+                ),
+              ),
                   );
                 }
               ):CircularProgressIndicator();
@@ -224,7 +233,8 @@ class _HomeState extends State<Home> {
                 )
                 ),
               ),
-              
+              SizedBox(height: 30.0),
+              allItemsVertically(),
           ],
         ),
       ),
@@ -236,11 +246,12 @@ class _HomeState extends State<Home> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             iceCream = true;
             pizza = false;
             salad = false;
             burger = false;
+            fooditemStream = await DatabaseMethods().getFoodItem("Ice-cream");
             setState(() {});
           },
           child: Material(
@@ -263,11 +274,12 @@ class _HomeState extends State<Home> {
           ),
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             iceCream = false;
             pizza = true;
             salad = false;
             burger = false;
+            fooditemStream = await DatabaseMethods().getFoodItem("Pizza");
             setState(() {});
           },
           child: Material(
@@ -290,11 +302,12 @@ class _HomeState extends State<Home> {
           ),
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             iceCream = false;
             pizza = false;
             salad = true;
             burger = false;
+            fooditemStream = await DatabaseMethods().getFoodItem("Salad");
             setState(() {});
           },
           child: Material(
@@ -317,11 +330,12 @@ class _HomeState extends State<Home> {
           ),
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             iceCream = false;
             pizza = false;
             salad = false;
             burger = true;
+            fooditemStream = await DatabaseMethods().getFoodItem("Burger");
             setState(() {});
           },
           child: Material(
