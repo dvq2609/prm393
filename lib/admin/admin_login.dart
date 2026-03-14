@@ -22,202 +22,181 @@ class _AdminLoginState extends State<AdminLogin> {
         child: Stack(
           children: [
             Container(
-              margin:
-                  EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
+              margin: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 2,
+              ),
               padding: EdgeInsets.only(top: 45.0, left: 20.0, right: 20.0),
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Color.fromARGB(255, 53, 51, 51), Colors.black],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight),
-                  borderRadius: BorderRadius.vertical(
-                      top: Radius.elliptical(
-                          MediaQuery.of(context).size.width, 110.0))),
+                gradient: LinearGradient(
+                  colors: [Color.fromARGB(255, 53, 51, 51), Colors.black],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.elliptical(
+                    MediaQuery.of(context).size.width,
+                    110.0,
+                  ),
+                ),
+              ),
             ),
             Container(
               margin: EdgeInsets.only(left: 30.0, right: 30.0, top: 60.0),
               child: Form(
-                  key: _formkey,
-                  child: Column(
-                    children: [
-                      Text(
-                        "Let's start with\nAdmin!",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.bold),
+                key: _formkey,
+                child: Column(
+                  children: [
+                    Text(
+                      "Let's start with\nAdmin!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 25.0,
+                        fontWeight: FontWeight.bold,
                       ),
-                      SizedBox(
-                        height: 30.0,
-                      ),
-                      Material(
-                        elevation: 3.0,
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          height: MediaQuery.of(context).size.height / 2.2,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 50.0,
+                    ),
+                    SizedBox(height: 30.0),
+                    Material(
+                      elevation: 3.0,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height / 2.2,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 50.0),
+                            Container(
+                              padding: EdgeInsets.only(
+                                left: 20.0,
+                                top: 5.0,
+                                bottom: 5.0,
                               ),
-                              Container(
-                                padding: EdgeInsets.only(
-                                    left: 20.0, top: 5.0, bottom: 5.0),
-                                margin: EdgeInsets.symmetric(horizontal: 20.0),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color:
-                                            Color.fromARGB(255, 160, 160, 147)),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Center(
-                                  child: TextFormField(
-                                    controller: usernamecontroller,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please Enter Username';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: "Username",
-                                        hintStyle: TextStyle(
-                                            color: Color.fromARGB(
-                                                255, 160, 160, 147))),
-                                  ),
+                              margin: EdgeInsets.symmetric(horizontal: 20.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color.fromARGB(255, 160, 160, 147),
                                 ),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              SizedBox(
-                                height: 40.0,
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(
-                                    left: 20.0, top: 5.0, bottom: 5.0),
-                                margin: EdgeInsets.symmetric(horizontal: 20.0),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color:
-                                            Color.fromARGB(255, 160, 160, 147)),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Center(
-                                  child: TextFormField(
-                                    controller: userpasswordcontroller,
-                                    obscureText: true,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please Enter Password';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: "Password",
-                                        hintStyle: TextStyle(
-                                            color: Color.fromARGB(
-                                                255, 160, 160, 147))),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 40.0,
-                              ),
-                              GestureDetector(
-                                onTap: (){
-                                  LoginAdmin();
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                                  margin: EdgeInsets.symmetric(horizontal: 20.0),
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: Center(
-                                    child: Text(
-                                      "LogIn",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold),
+                              child: Center(
+                                child: TextFormField(
+                                  controller: usernamecontroller,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please Enter Username';
+                                    }
+                                    return null;
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Username",
+                                    hintStyle: TextStyle(
+                                      color: Color.fromARGB(255, 160, 160, 147),
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                height: 20.0,
+                            ),
+                            SizedBox(height: 40.0),
+                            Container(
+                              padding: EdgeInsets.only(
+                                left: 20.0,
+                                top: 5.0,
+                                bottom: 5.0,
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  setupAdmin();
-                                },
-                                child: const Text(
-                                  "Hello",
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w500),
+                              margin: EdgeInsets.symmetric(horizontal: 20.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color.fromARGB(255, 160, 160, 147),
                                 ),
-                              )
-                            ],
-                          ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: TextFormField(
+                                  controller: userpasswordcontroller,
+                                  obscureText: true,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please Enter Password';
+                                    }
+                                    return null;
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Password",
+                                    hintStyle: TextStyle(
+                                      color: Color.fromARGB(255, 160, 160, 147),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 40.0),
+                            GestureDetector(
+                              onTap: () {
+                                LoginAdmin();
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 12.0),
+                                margin: EdgeInsets.symmetric(horizontal: 20.0),
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "LogIn",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  )),
-            )
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  setupAdmin() {
-    FirebaseFirestore.instance.collection("Admin").add({
-      "id": "admin",
-      "password": "12345"
-    }).then((value) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text(
-            "Admin account (admin / 12345) created successfully!",
-            style: TextStyle(fontSize: 18.0),
-          )));
-    }).catchError((error) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text(
-            "Error: $error",
-            style: const TextStyle(fontSize: 18.0),
-          )));
-    });
-  }
-
   LoginAdmin() {
     FirebaseFirestore.instance.collection("Admin").get().then((snapshot) {
       bool found = false;
       snapshot.docs.forEach((result) {
-        if (result.data()['id'] == usernamecontroller.text.trim() && 
+        if (result.data()['id'] == usernamecontroller.text.trim() &&
             result.data()['password'] == userpasswordcontroller.text.trim()) {
           found = true;
           Route route = MaterialPageRoute(builder: (context) => HomeAdmin());
           Navigator.pushReplacement(context, route);
         }
       });
-      
+
       if (!found) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.orangeAccent,
-          content: Text(
-            "Invalid ID or Password",
-            style: TextStyle(fontSize: 18.0),
-          )));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.orangeAccent,
+            content: Text(
+              "Invalid ID or Password",
+              style: TextStyle(fontSize: 18.0),
+            ),
+          ),
+        );
       }
     });
   }

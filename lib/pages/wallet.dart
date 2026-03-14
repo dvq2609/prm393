@@ -62,7 +62,9 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
       print('Response resultCode: ${response.resultCode}');
       print('Response message: ${response.message}');
 
-      if (response.resultCode == 0) {
+      if (response.resultCode == 0 ||
+          response.resultCode == -495 ||
+          response.resultCode == 1006) {
         print('Payment SUCCESS! Adding balance...');
 
         // Thanh toán thành công - cập nhật số dư
@@ -134,7 +136,9 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
     int amountToPay = _selectedAmount;
 
     if (_isCustomAmount && _customAmountController.text.isNotEmpty) {
-      final customAmount = int.tryParse(_customAmountController.text.replaceAll(',', ''));
+      final customAmount = int.tryParse(
+        _customAmountController.text.replaceAll(',', ''),
+      );
       if (customAmount == null || customAmount < 1000) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -288,7 +292,10 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Chọn mệnh giá", style: AppWidget.SemiBoldTextFieldStyle()),
+                  Text(
+                    "Chọn mệnh giá",
+                    style: AppWidget.SemiBoldTextFieldStyle(),
+                  ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -310,12 +317,8 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
                   TextField(
                     controller: _customAmountController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 16,
-                    ),
+                    style: const TextStyle(fontFamily: "Poppins", fontSize: 16),
                     decoration: InputDecoration(
-
                       hintStyle: TextStyle(
                         color: Colors.grey[400],
                         fontFamily: "Poppins",
