@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:prm393/admin/add_food.dart';
 
 class DatabaseMethods{
   Future<void> addUserDetail(Map<String, dynamic> userInfoMap, String id) async {
@@ -25,5 +26,12 @@ class DatabaseMethods{
     return await FirebaseFirestore.instance
     .collection(name)
     .snapshots();
+  }
+  Future<void> AddFoodtoCart(Map<String, dynamic> userInfoMap, String id) async {
+    await FirebaseFirestore.instance
+    .collection("users")
+    .doc(id)
+    .collection("Cart")
+    .add(userInfoMap);
   }
 }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:prm393/widget/widget_support.dart';
+import 'package:prm393/services/database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Details extends StatefulWidget {
-  const Details({super.key});
+  String name, price, image, detail;
+  Details({Key? key, required this.name, required this.price, required this.image, required this.detail}) : super(key: key);
+  // Details({ required this.name, required this.price, required this.image, required this.detail});
 
   @override
   State<StatefulWidget> createState() {
@@ -12,7 +16,31 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> {
-  int a = 1;
+  int a = 1, total =0;
+  String? id;
+
+  getthesharedpref() async {
+    // id = await SharedPreferencesHelper().getUserId();
+    setState(() {
+
+    });
+  }
+
+  ontheload() async {
+    await getthesharedpref();
+    setState(() {
+
+    });
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+      ontheload();
+    total = int.parse( widget.price);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,6 +77,7 @@ class _DetailsState extends State<Details> {
                   {
                    if(a >1){
                      --a;
+                      total = total - int.parse(widget.price);
                    }
 
                     setState(() {
@@ -68,6 +97,7 @@ class _DetailsState extends State<Details> {
                   onTap: ()
                   {
                     ++a;
+                    total = total + int.parse(widget.price);
                     setState(() {
 
                     });
@@ -96,24 +126,39 @@ class _DetailsState extends State<Details> {
               Column(
                 children: [
                   Text("Total price", style: AppWidget.boldTextFieldStyle(),),
-                  Text("\$28", style: AppWidget.boldTextFieldStyle(),),
+                  Text("\$"+total.toString(), style: AppWidget.boldTextFieldStyle(),),
                 ],
               ),
               SizedBox(width: 150,),
 
-              Container(
-                padding: EdgeInsets.all(3),
-                decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
-                child: Row(
-                  children: [
-                    Text("Add to cart",style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold,fontFamily: "Poppins"),),
-                    GestureDetector(
-                        child: Container(
-                          padding: EdgeInsets.all(3),
-
-                            child: Icon(Icons.shopping_cart_outlined,color: Colors.white,))
-                    )
-                    ]
+              GestureDetector(
+                onTap: () async {
+                  Map<String,dynamic> addFoodtoCard = {
+                    "Name": widget.name,
+                    "Quantity": a.toString(),
+                    "Total": total.toString(),
+                    "Image": widget.image
+                  };
+                  await DatabaseMethods().AddFoodtoCart(addFoodtoCard, id!);
+                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    backgroundColor: Colors.orangeAccent,
+                    content: Text("Added to cart", style: TextStyle(fontSize: 18.0)),));
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width/2,
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+                  child: Row(
+                    children: [
+                      Text("Add to cart",style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold,fontFamily: "Poppins"),),
+                      GestureDetector(
+                          child: Container(
+                            padding: EdgeInsets.all(3),
+                
+                              child: Icon(Icons.shopping_cart_outlined,color: Colors.white,))
+                      )
+                      ]
+                  ),
                 ),
               )
             ],),)
