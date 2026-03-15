@@ -42,7 +42,14 @@ class _HomeState extends State<Home> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Details()),
+                        MaterialPageRoute(
+                          builder: (context) => Details(
+                            name: ds["Name"],
+                            price: ds["Price"],
+                            image: ds["Image"],
+                            detail: ds["Detail"],
+                          ),
+                        ),
                       );
                     },
                     child: Container(
@@ -114,7 +121,14 @@ class _HomeState extends State<Home> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Details()),
+                        MaterialPageRoute(
+                          builder: (context) => Details(
+                            name: ds["Name"],
+                            price: ds["Price"],
+                            image: ds["Image"],
+                            detail: ds["Detail"],
+                          ),
+                        ),
                       );
                     },
                     child: Container(
@@ -372,7 +386,14 @@ class _HomeState extends State<Home> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Details()),
+                    MaterialPageRoute(
+                      builder: (context) => Details(
+                        name: "Mix Veg Salad",
+                        price: "20",
+                        image: "images/salad4.png",
+                        detail: "Delicious and healthy",
+                      ),
+                    ),
                   );
                 },
                 child: Container(
@@ -415,7 +436,14 @@ class _HomeState extends State<Home> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Details()),
+                    MaterialPageRoute(
+                      builder: (context) => Details(
+                        name: "Mix Veg Salad",
+                        price: "20",
+                        image: "images/salad4.png",
+                        detail: "Delicious and healthy",
+                      ),
+                    ),
                   );
                 },
                 child: Container(
@@ -461,7 +489,14 @@ class _HomeState extends State<Home> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Details()),
+              MaterialPageRoute(
+                builder: (context) => Details(
+                  name: "Mix Veg Salad",
+                  price: "20",
+                  image: "images/salad4.png",
+                  detail: "Delicious and healthy",
+                ),
+              ),
             );
           },
           child: Container(
