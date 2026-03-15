@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/services/database.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Details extends StatefulWidget {
   String name, price, image, detail;
