@@ -119,22 +119,16 @@ class _DetailsState extends State<Details> {
               ],
             ),
             SizedBox(height: 15),
-            Text("Description", style: AppWidget.boldTextFieldStyle()),
-            Text(
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-              style: AppWidget.SemiBoldTextFieldStyle(),
-              maxLines: 3,
-            ),
-            SizedBox(height: 15),
-            Row(
-              children: [
-                Text("Delivery time ", style: AppWidget.boldTextFieldStyle()),
-                SizedBox(width: 20),
-                Icon(Icons.alarm, color: Colors.black45),
-                Text("30 minutes", style: AppWidget.boldTextFieldStyle()),
-              ],
-            ),
-            SizedBox(height: 100),
+            Text("Description", style: AppWidget.boldTextFieldStyle(),),
+            Text(widget.detail,style: AppWidget.SemiBoldTextFieldStyle(),maxLines: 3,),
+            SizedBox(height: 15,),
+            Row(children: [
+              Text("Delivery time ", style: AppWidget.boldTextFieldStyle(),),
+              SizedBox(width: 20,),
+              Icon(Icons.alarm,color: Colors.black45,),
+              Text("30 minutes", style: AppWidget.boldTextFieldStyle(),)
+            ],),
+            SizedBox(height: 100,),
 
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
