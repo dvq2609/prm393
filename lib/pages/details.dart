@@ -112,7 +112,7 @@ class _DetailsState extends State<Details> {
             ),
             SizedBox(height: 15),
             Text("Description", style: AppWidget.boldTextFieldStyle(),),
-            Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",style: AppWidget.SemiBoldTextFieldStyle(),maxLines: 3,),
+            Text(widget.detail,style: AppWidget.SemiBoldTextFieldStyle(),maxLines: 3,),
             SizedBox(height: 15,),
             Row(children: [
               Text("Delivery time ", style: AppWidget.boldTextFieldStyle(),),
