@@ -1,11 +1,9 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:prm393/services/database.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:random_string/random_string.dart';
 import 'dart:io';
+import 'dart:convert';
 
 class AddFood extends StatefulWidget {
   const AddFood({super.key});
@@ -21,7 +19,7 @@ class _AddFoodState extends State<AddFood> {
     'images/salad2.png',
     'images/burger.png',
     'images/pizza.png',
-    'images/salad.png'
+    'images/salad.png',
   ];
   String? value;
   String? selectedAssetImage;
@@ -32,7 +30,12 @@ class _AddFoodState extends State<AddFood> {
   File? selectedImage;
 
   Future getImage() async {
-    var image = await _picker.pickImage(source: ImageSource.gallery);
+    var image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 30, // Compress image quality to 30% for JPG
+      maxWidth: 300, // Strictly resize image to max 300px width for all formats
+      maxHeight: 300, // Strictly resize image to max 300px height for all formats
+    );
 
     if (image != null) {
       selectedImage = File(image.path);
@@ -54,36 +57,37 @@ class _AddFoodState extends State<AddFood> {
         pricecontroller.text != "" &&
         detailcontroller.text != "" &&
         value != null) {
-      
-      String addId = randomAlphaNumeric(10);
       String downloadUrl = "";
 
       if (selectedImage != null) {
-        // Upload gallery image to Firebase Storage
-        Reference firebaseStorageRef =
-            FirebaseStorage.instance.ref().child("blogImages").child(addId);
-        final UploadTask task = firebaseStorageRef.putFile(selectedImage!);
-        downloadUrl = await (await task).ref.getDownloadURL();
+        // Encode the image to Base64 to save directly in Firestore
+        List<int> imageBytes = await selectedImage!.readAsBytes();
+        String base64Image = base64Encode(imageBytes);
+        // Prefix it so the UI knows it's a base64 string
+        downloadUrl = "base64,$base64Image";
       } else if (selectedAssetImage != null) {
         // Use local asset path string for the image (you can handle this on display side if it starts with 'images/')
-         downloadUrl = selectedAssetImage!;
+        downloadUrl = selectedAssetImage!;
       }
 
       Map<String, dynamic> addItem = {
         "Image": downloadUrl,
         "Name": namecontroller.text,
         "Price": pricecontroller.text,
-        "Detail": detailcontroller.text
+        "Detail": detailcontroller.text,
       };
 
       await DatabaseMethods().addFoodItem(addItem, value!).then((value) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             backgroundColor: Colors.orangeAccent,
             content: Text(
               "Food Item has been added Successfully",
               style: TextStyle(fontSize: 18.0),
-            )));
-        
+            ),
+          ),
+        );
+
         // Clear fields
         namecontroller.clear();
         pricecontroller.clear();
@@ -95,10 +99,15 @@ class _AddFoodState extends State<AddFood> {
         });
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.redAccent,
-        content: Text("Please fill all fields and select an image", style: TextStyle(fontSize: 18.0),)
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text(
+            "Please fill all fields and select an image",
+            style: TextStyle(fontSize: 18.0),
+          ),
+        ),
+      );
     }
   }
 
@@ -167,23 +176,25 @@ class _AddFoodState extends State<AddFood> {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Icon(
-              Icons.arrow_back_ios_new_outlined,
-              color: Color(0xFF373866),
-            )),
-        centerTitle: true,
-        title: Text(
-          "Add Item",
-          style: AppWidget.HeadLineTextFieldStyle(),
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(
+            Icons.arrow_back_ios_new_outlined,
+            color: Color(0xFF373866),
+          ),
         ),
+        centerTitle: true,
+        title: Text("Add Item", style: AppWidget.HeadLineTextFieldStyle()),
       ),
       body: SingleChildScrollView(
         child: Container(
-          margin:
-              EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0, bottom: 50.0),
+          margin: EdgeInsets.only(
+            left: 20.0,
+            right: 20.0,
+            top: 20.0,
+            bottom: 50.0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -191,9 +202,7 @@ class _AddFoodState extends State<AddFood> {
                 "Upload the Item Picture",
                 style: AppWidget.SemiBoldTextFieldStyle(),
               ),
-              SizedBox(
-                height: 20.0,
-              ),
+              SizedBox(height: 20.0),
               (selectedImage == null && selectedAssetImage == null)
                   ? GestureDetector(
                       onTap: () {
@@ -207,8 +216,10 @@ class _AddFoodState extends State<AddFood> {
                             width: 150,
                             height: 150,
                             decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.black, width: 1.5),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1.5,
+                              ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -221,7 +232,7 @@ class _AddFoodState extends State<AddFood> {
                     )
                   : Center(
                       child: GestureDetector(
-                         onTap: () {
+                        onTap: () {
                           _showImageSourceDialog();
                         },
                         child: Material(
@@ -231,143 +242,129 @@ class _AddFoodState extends State<AddFood> {
                             width: 150,
                             height: 150,
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 1.5),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1.5,
+                              ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: selectedImage != null 
-                                ? Image.file(
-                                    selectedImage!,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.asset(
-                                    selectedAssetImage!,
-                                    fit: BoxFit.cover,
-                                ),
+                              child: selectedImage != null
+                                  ? Image.file(
+                                      selectedImage!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      selectedAssetImage!,
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                           ),
                         ),
                       ),
                     ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Text(
-                "Item Name",
-                style: AppWidget.SemiBoldTextFieldStyle(),
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
+              SizedBox(height: 30.0),
+              Text("Item Name", style: AppWidget.SemiBoldTextFieldStyle()),
+              SizedBox(height: 10.0),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
+                  color: Color(0xFFececf8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: TextField(
                   controller: namecontroller,
                   decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Item Name",
-                      hintStyle: AppWidget.LightTextFieldStyle()),
+                    border: InputBorder.none,
+                    hintText: "Enter Item Name",
+                    hintStyle: AppWidget.LightTextFieldStyle(),
+                  ),
                 ),
               ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Text(
-                "Item Price",
-                style: AppWidget.SemiBoldTextFieldStyle(),
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
+              SizedBox(height: 30.0),
+              Text("Item Price", style: AppWidget.SemiBoldTextFieldStyle()),
+              SizedBox(height: 10.0),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
+                  color: Color(0xFFececf8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: TextField(
                   controller: pricecontroller,
                   decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Item Price",
-                      hintStyle: AppWidget.LightTextFieldStyle()),
+                    border: InputBorder.none,
+                    hintText: "Enter Item Price",
+                    hintStyle: AppWidget.LightTextFieldStyle(),
+                  ),
                 ),
               ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Text(
-                "Item Detail",
-                style: AppWidget.SemiBoldTextFieldStyle(),
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
+              SizedBox(height: 30.0),
+              Text("Item Detail", style: AppWidget.SemiBoldTextFieldStyle()),
+              SizedBox(height: 10.0),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
+                  color: Color(0xFFececf8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: TextField(
                   maxLines: 6,
                   controller: detailcontroller,
                   decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Item Detail",
-                      hintStyle: AppWidget.LightTextFieldStyle()),
+                    border: InputBorder.none,
+                    hintText: "Enter Item Detail",
+                    hintStyle: AppWidget.LightTextFieldStyle(),
+                  ),
                 ),
               ),
-              SizedBox(
-                height: 20.0,
-              ),
+              SizedBox(height: 20.0),
               Text(
                 "Select Category",
                 style: AppWidget.SemiBoldTextFieldStyle(),
               ),
-              SizedBox(
-                height: 20.0,
-              ),
+              SizedBox(height: 20.0),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
+                  color: Color(0xFFececf8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                  items: fooditems
-                      .map((item) => DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(
-                            item,
-                            style:
-                                TextStyle(fontSize: 18.0, color: Colors.black),
-                          )))
-                      .toList(),
-                  onChanged: ((value) => setState(() {
-                        this.value = value;
-                      })),
-                  dropdownColor: Colors.white,
-                  hint: Text("Select Category"),
-                  iconSize: 36,
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: Colors.black,
+                  child: DropdownButton<String>(
+                    items: fooditems
+                        .map(
+                          (item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(
+                              item,
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: ((value) => setState(() {
+                      this.value = value;
+                    })),
+                    dropdownColor: Colors.white,
+                    hint: Text("Select Category"),
+                    iconSize: 36,
+                    icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+                    value: value,
                   ),
-                  value: value,
-                )),
+                ),
               ),
-              SizedBox(
-                height: 30.0,
-              ),
+              SizedBox(height: 30.0),
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   uploadItem();
                 },
                 child: Center(
@@ -378,21 +375,23 @@ class _AddFoodState extends State<AddFood> {
                       padding: EdgeInsets.symmetric(vertical: 5.0),
                       width: 150,
                       decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(10)),
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Center(
                         child: Text(
                           "Add",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22.0,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

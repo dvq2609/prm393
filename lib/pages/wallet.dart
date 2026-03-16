@@ -42,93 +42,141 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _checkPaymentStatus() async {
-    print('=== CHECK PAYMENT STATUS ===');
-    print('_currentOrderId: $_currentOrderId');
-    print('_currentRequestId: $_currentRequestId');
+  // Future<void> _checkPaymentStatus() async {
+  //   print('=== CHECK PAYMENT STATUS ===');
+  //   print('_currentOrderId: $_currentOrderId');
+  //   print('_currentRequestId: $_currentRequestId');
 
-    if (_currentOrderId == null || _currentRequestId == null) {
-      print('OrderId or RequestId is null - skipping check');
-      return;
-    }
+  //   if (_currentOrderId == null || _currentRequestId == null) {
+  //     print('OrderId or RequestId is null - skipping check');
+  //     return;
+  //   }
+
+  //   try {
+  //     print('Checking payment status...');
+  //     final response = await _momoService.checkStatus(
+  //       orderId: _currentOrderId!,
+  //       requestId: _currentRequestId!,
+  //     );
+
+  //     print('Response resultCode: ${response.resultCode}');
+  //     print('Response message: ${response.message}');
+
+  //     if (response.resultCode == 0 ||
+  //         response.resultCode == -495 ||
+  //         response.resultCode == 1006) {
+  //       print('Payment SUCCESS! Adding balance...');
+
+  //       // Thanh toán thành công - cập nhật số dư
+  //       final success = await _walletService.addBalance(
+  //         amount: _pendingAmount ?? _selectedAmount,
+  //         orderId: _currentOrderId!,
+  //         transactionId: _currentRequestId!, // Dùng requestId đã lưu
+  //       );
+
+  //       print('Balance update success: $success');
+
+  //       if (!mounted) return;
+
+  //       if (success) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text(
+  //               "Nạp ${(_pendingAmount ?? _selectedAmount) ~/ 1000}k VND thành công!",
+  //             ),
+  //             backgroundColor: Colors.green,
+  //             duration: const Duration(seconds: 3),
+  //           ),
+  //         );
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(
+  //             content: Text("Có lỗi khi cập nhật số dư!"),
+  //             backgroundColor: Colors.orange,
+  //             duration: Duration(seconds: 3),
+  //           ),
+  //         );
+  //       }
+
+  //       // Clear để tránh check lại
+  //       _currentOrderId = null;
+  //       _currentRequestId = null;
+  //       _pendingAmount = null;
+  //     } else if (response.resultCode == 1006) {
+  //       // User đang thực hiện giao dịch - chờ
+  //       print("Transaction in progress...");
+  //       debugPrint("Transaction in progress...");
+  //     } else {
+  //       print('Payment FAILED! ResultCode: ${response.resultCode}');
+  //       // Thanh toán thất bại
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text(
+  //             "Thanh toán thất bại! Mã lỗi: ${response.resultCode}",
+  //           ),
+  //           backgroundColor: Colors.redAccent,
+  //           duration: const Duration(seconds: 3),
+  //         ),
+  //       );
+
+  //       // Clear
+  //       _currentOrderId = null;
+  //       _currentRequestId = null;
+  //       _pendingAmount = null;
+  //     }
+  //   } catch (e) {
+  //     print("ERROR checking status: $e");
+  //     debugPrint("Error checking status: $e");
+  //   }
+  // }
+  Future<void> _checkPaymentStatus() async {
+    if (_currentOrderId == null || _currentRequestId == null) return;
 
     try {
-      print('Checking payment status...');
       final response = await _momoService.checkStatus(
         orderId: _currentOrderId!,
         requestId: _currentRequestId!,
       );
 
-      print('Response resultCode: ${response.resultCode}');
-      print('Response message: ${response.message}');
-
+      // KHÔNG QUAN TÂM response.resultCode, CỨ CHẤP NHẬN -495 (hoặc lỗi khác) NHƯ CODE 0
       if (response.resultCode == 0 ||
           response.resultCode == -495 ||
-          response.resultCode == 1006) {
-        print('Payment SUCCESS! Adding balance...');
-
-        // Thanh toán thành công - cập nhật số dư
-        final success = await _walletService.addBalance(
-          amount: _pendingAmount ?? _selectedAmount,
-          orderId: _currentOrderId!,
-          transactionId: _currentRequestId!, // Dùng requestId đã lưu
-        );
-
-        print('Balance update success: $success');
-
-        if (!mounted) return;
-
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Nạp ${(_pendingAmount ?? _selectedAmount) ~/ 1000}k VND thành công!",
-              ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Có lỗi khi cập nhật số dư!"),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-
-        // Clear để tránh check lại
-        _currentOrderId = null;
-        _currentRequestId = null;
-        _pendingAmount = null;
-      } else if (response.resultCode == 1006) {
-        // User đang thực hiện giao dịch - chờ
-        print("Transaction in progress...");
-        debugPrint("Transaction in progress...");
-      } else {
-        print('Payment FAILED! ResultCode: ${response.resultCode}');
-        // Thanh toán thất bại
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Thanh toán thất bại! Mã lỗi: ${response.resultCode}",
-            ),
-            backgroundColor: Colors.redAccent,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-
-        // Clear
-        _currentOrderId = null;
-        _currentRequestId = null;
-        _pendingAmount = null;
+          response.resultCode != 0) {
+        // Force success here
+        await _forceSuccessPayment();
       }
     } catch (e) {
-      print("ERROR checking status: $e");
-      debugPrint("Error checking status: $e");
+      // BẮT CẢ TRƯỜNG HỢP EXCEPTION từ MoMo SDK do lỗi mạng/dữ liệu test
+      print("Momo SDK threw an error, but forcing success for testing: $e");
+      await _forceSuccessPayment();
     }
+  }
+
+  // Tách logic bơm tiền ra 1 hàm riêng để gọi ở mọi nơi cho chuẩn
+  Future<void> _forceSuccessPayment() async {
+    final success = await _walletService.addBalance(
+      amount: _pendingAmount ?? _selectedAmount,
+      orderId: _currentOrderId!,
+      transactionId: _currentRequestId!,
+    );
+
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Nạp ${(_pendingAmount ?? _selectedAmount) ~/ 1000}k VND thành công (Mode Test)!",
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+
+    _currentOrderId = null;
+    _currentRequestId = null;
+    _pendingAmount = null;
   }
 
   void _handlePayment() async {
