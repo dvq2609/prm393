@@ -73,6 +73,17 @@ class DatabaseMethods {
     }
   }
 
+  Future<void> saveOrder(Map<String, dynamic> orderData) async {
+    await FirebaseFirestore.instance.collection("orders").add(orderData);
+  }
+
+  Future<Stream<QuerySnapshot>> getAllOrders() async {
+    return FirebaseFirestore.instance
+        .collection("orders")
+        .orderBy("createdAt", descending: true)
+        .snapshots();
+  }
+
   Future<void> updateFoodItem(String category, String id, Map<String, dynamic> updatedInfo) async {
     await FirebaseFirestore.instance
         .collection(category)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prm393/admin/add_food.dart';
+import 'package:prm393/admin/view_order.dart';
 import 'package:prm393/admin/view_transactions.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/admin/view_food.dart';
@@ -161,6 +162,55 @@ class _HomeAdminState extends State<HomeAdmin> {
                         Expanded(
                           child: Text(
                             "View all food items",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 50),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ViewOrder()),
+                );
+              },
+              child: Material(
+                elevation: 10.0,
+                borderRadius: BorderRadius.circular(10),
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.all(6.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              "images/order.png",
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 30.0),
+                        Expanded(
+                          child: Text(
+                            "View all orders",
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20.0,
