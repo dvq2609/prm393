@@ -1,37 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:prm393/admin/add_food.dart';
 
-class DatabaseMethods{
+class DatabaseMethods {
   Future<void> addUserDetail(Map<String, dynamic> userInfoMap, String id) async {
     await FirebaseFirestore.instance
-    .collection("users")
-    .doc(id)
-    .set(userInfoMap);
+        .collection("users")
+        .doc(id)
+        .set(userInfoMap);
   }
 
   UpdateUserwallet(String id, String amout) async {
     await FirebaseFirestore.instance
-    .collection("users")
-    .doc(id)
-    .update({"wallet": amout});
+        .collection("users")
+        .doc(id)
+        .update({"wallet": amout});
   }
 
   Future addFoodItem(Map<String, dynamic> userInfoMap, String name) async {
-    return await FirebaseFirestore.instance
-    .collection(name)
-    .add(userInfoMap);
+    return await FirebaseFirestore.instance.collection(name).add(userInfoMap);
   }
 
   Future<Stream<QuerySnapshot>> getFoodItem(String name) async {
-    return await FirebaseFirestore.instance
-    .collection(name)
-    .snapshots();
+    return await FirebaseFirestore.instance.collection(name).snapshots();
   }
+
   Future<void> AddFoodtoCart(Map<String, dynamic> userInfoMap, String id) async {
     await FirebaseFirestore.instance
-    .collection("users")
-    .doc(id)
-    .collection("Cart")
-    .add(userInfoMap);
+        .collection("users")
+        .doc(id)
+        .collection("Cart")
+        .add(userInfoMap);
+  }
+
+  Future<Stream<QuerySnapshot>> getFoodCart(String id) async {
+    return FirebaseFirestore.instance
+        .collection("users")
+        .doc(id)
+        .collection("Cart")
+        .snapshots();
   }
 }

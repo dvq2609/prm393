@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/services/database.dart';
+import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
 
 class Order extends StatefulWidget {
@@ -101,11 +102,11 @@ class _OrderState extends State<Order> {
                             children: [
                               Text(
                                 ds["Name"],
-                                style: AppWidget.semiBoldTextFeildStyle(),
+                                style: AppWidget.SemiBoldTextFieldStyle(),
                               ),
                               Text(
                                 "\$"+ ds["Total"],
-                                style: AppWidget.semiBoldTextFeildStyle(),
+                                style: AppWidget.SemiBoldTextFieldStyle(),
                               )
                             ],
                           )
@@ -134,7 +135,7 @@ class _OrderState extends State<Order> {
                     child: Center(
                         child: Text(
                           "Food Cart",
-                          style: AppWidget.HeadlineTextFeildStyle(),
+                          style: AppWidget.HeadLineTextFieldStyle(),
                         )))),
             SizedBox(
               height: 20.0,
@@ -151,11 +152,11 @@ class _OrderState extends State<Order> {
                 children: [
                   Text(
                     "Total Price",
-                    style: AppWidget.boldTextFeildStyle(),
+                    style: AppWidget.boldTextFieldStyle(),
                   ),
                   Text(
                     "\$"+ total.toString(),
-                    style: AppWidget.semiBoldTextFeildStyle(),
+                    style: AppWidget.SemiBoldTextFieldStyle(),
                   )
                 ],
               ),

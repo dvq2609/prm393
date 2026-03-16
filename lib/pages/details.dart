@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/services/database.dart';
+import 'package:prm393/services/shared_pref.dart';
 
 class Details extends StatefulWidget {
   String name, price, image, detail;
@@ -19,7 +20,7 @@ class _DetailsState extends State<Details> {
   String? id;
 
   getthesharedpref() async {
-    // id = await SharedPreferencesHelper().getUserId();
+    id = await SharedPreferenceHelper().getUserId();
     setState(() {
 
     });

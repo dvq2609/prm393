@@ -4,6 +4,7 @@ import 'package:prm393/pages/bottom_nav.dart';
 import 'package:prm393/pages/forget_password.dart';
 import 'package:prm393/pages/sign_up.dart';
 import 'package:prm393/admin/admin_login.dart';
+import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
 
 class Login extends StatefulWidget {
@@ -28,6 +29,10 @@ class _LoginState extends State<Login> {
       try {
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
+        
+        await SharedPreferenceHelper().saveUserId(userCredential.user!.uid);
+        await SharedPreferenceHelper().saveUserEmail(email);
+        // Note: Wallet might need a separate fetch if you want to store it locally here
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

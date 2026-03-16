@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/pages/bottom_nav.dart';
 import 'package:prm393/pages/login.dart';
+import 'package:prm393/services/database.dart';
+import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
 
 class SignUp extends StatefulWidget {
@@ -29,6 +31,19 @@ class _SignUpState extends State<SignUp> {
       try {
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
+        
+        await SharedPreferenceHelper().saveUserId(userCredential.user!.uid);
+        await SharedPreferenceHelper().saveUserEmail(email);
+        await SharedPreferenceHelper().saveUserName(name);
+        await SharedPreferenceHelper().saveUserWallet("0");
+
+        Map<String, dynamic> userInfoMap = {
+          "Name": name,
+          "Email": email,
+          "Wallet": "0",
+          "Id": userCredential.user!.uid,
+        };
+        await DatabaseMethods().addUserDetail(userInfoMap, userCredential.user!.uid);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
 
