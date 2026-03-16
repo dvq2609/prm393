@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/services/database.dart';
 import 'package:prm393/services/shared_pref.dart';
+import 'dart:convert';
 
 class Details extends StatefulWidget {
   String name, price, image, detail;
@@ -59,10 +60,25 @@ class _DetailsState extends State<Details> {
                 color: Colors.black,
               ),
             ),
-            Image.asset(
-              "images/salad2.png",
-              width: MediaQuery.of(context).size.height / 2.5,
-              fit: BoxFit.fill,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: widget.image.startsWith("base64,")
+                  ? Image.memory(
+                      base64Decode(widget.image.substring(7)),
+                      width: MediaQuery.of(context).size.height / 2.5,
+                      fit: BoxFit.cover,
+                    )
+                  : widget.image.startsWith("http")
+                  ? Image.network(
+                      widget.image,
+                      width: MediaQuery.of(context).size.height / 2.5,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      widget.image.replaceAll("file:///", ""),
+                      width: MediaQuery.of(context).size.height / 2.5,
+                      fit: BoxFit.cover,
+                    ),
             ),
             SizedBox(height: 15),
             Row(
@@ -72,13 +88,10 @@ class _DetailsState extends State<Details> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Mediterraenan",
+                      widget.name,
                       style: AppWidget.SemiBoldTextFieldStyle(),
                     ),
-                    Text(
-                      "Mediterraenan",
-                      style: AppWidget.boldTextFieldStyle(),
-                    ),
+                    Text(widget.name, style: AppWidget.boldTextFieldStyle()),
                   ],
                 ),
                 Spacer(),
@@ -119,22 +132,29 @@ class _DetailsState extends State<Details> {
               ],
             ),
             SizedBox(height: 15),
-            Text("Description", style: AppWidget.boldTextFieldStyle(),),
-            Text(widget.detail,style: AppWidget.SemiBoldTextFieldStyle(),maxLines: 3,),
-            SizedBox(height: 15,),
-            Row(children: [
-              Text("Delivery time ", style: AppWidget.boldTextFieldStyle(),),
-              SizedBox(width: 20,),
-              Icon(Icons.alarm,color: Colors.black45,),
-              Text("30 minutes", style: AppWidget.boldTextFieldStyle(),)
-            ],),
-            SizedBox(height: 100,),
+            Text("Description", style: AppWidget.boldTextFieldStyle()),
+            Text(
+              widget.detail,
+              style: AppWidget.SemiBoldTextFieldStyle(),
+              maxLines: 3,
+            ),
+            SizedBox(height: 15),
+            Row(
+              children: [
+                Text("Delivery time ", style: AppWidget.boldTextFieldStyle()),
+                SizedBox(width: 20),
+                Icon(Icons.alarm, color: Colors.black45),
+                Text("30 minutes", style: AppWidget.boldTextFieldStyle()),
+              ],
+            ),
+            SizedBox(height: 100),
 
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: Row(
                 children: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Total price",
@@ -146,7 +166,7 @@ class _DetailsState extends State<Details> {
                       ),
                     ],
                   ),
-                  SizedBox(width: 150),
+                  Spacer(),
 
                   GestureDetector(
                     onTap: () async {
