@@ -1,10 +1,12 @@
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/services/database.dart';
 import 'package:prm393/services/shared_pref.dart';
+import 'package:prm393/services/wallet_service.dart';
 import 'package:prm393/widget/widget_support.dart';
 
 class Order extends StatefulWidget {
@@ -15,23 +17,31 @@ class Order extends StatefulWidget {
 }
 
 class _OrderState extends State<Order> {
-  String? id, wallet;
-  int total=0, amount2=0;
+  String? id;
+  int total = 0, amount2 = 0;
+  final WalletService _walletService = WalletService();
+
+  Timer? _timer;
 
   void startTimer() {
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-        amount2 = total;
-      });
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          amount2 = total;
+        });
+      }
     });
   }
 
-  getthesharedpref()async{
-    id= await SharedPreferenceHelper().getUserId();
-    wallet= await SharedPreferenceHelper().getUserWallet();
-    setState(() {
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
-    });
+  getthesharedpref() async {
+    id = await SharedPreferenceHelper().getUserId();
+    setState(() {});
   }
 
   ontheload()async{
@@ -76,40 +86,65 @@ class _OrderState extends State<Order> {
                       padding: EdgeInsets.all(10),
                       child: Row(
                         children: [
+                          // Quantity badge
                           Container(
                             height: 90,
                             width: 40,
                             decoration: BoxDecoration(
                                 border: Border.all(),
                                 borderRadius: BorderRadius.circular(10)),
-                            child: Center(child: Text(ds["Quantity"])),
-                          ),
-                          SizedBox(
-                            width: 20.0,
-                          ),
-                          ClipRRect(
-                              borderRadius: BorderRadius.circular(60),
-                              child: Image.network(
-                                ds["Image"],
-                                height: 90,
-                                width: 90,
-                                fit: BoxFit.cover,
-                              )),
-                          SizedBox(
-                            width: 20.0,
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                ds["Name"],
-                                style: AppWidget.SemiBoldTextFieldStyle(),
+                            child: Center(
+                              child: Text(
+                                ds["Quantity"],
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              Text(
-                                "\$"+ ds["Total"],
-                                style: AppWidget.SemiBoldTextFieldStyle(),
-                              )
-                            ],
-                          )
+                            ),
+                          ),
+                          SizedBox(width: 12.0),
+                          // Image
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: ds["Image"].toString().startsWith("base64,")
+                                ? Image.memory(
+                                    base64Decode(ds["Image"].toString().substring(7)),
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : ds["Image"].toString().startsWith("http")
+                                    ? Image.network(
+                                        ds["Image"],
+                                        height: 80,
+                                        width: 80,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset(
+                                        ds["Image"].toString().replaceAll("file:///", ""),
+                                        height: 80,
+                                        width: 80,
+                                        fit: BoxFit.cover,
+                                      ),
+                          ),
+                          SizedBox(width: 12.0),
+                          // Name + Price
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  ds["Name"],
+                                  style: AppWidget.SemiBoldTextFieldStyle(),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  "\$" + ds["Total"],
+                                  style: AppWidget.boldTextFieldStyle(),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -165,11 +200,81 @@ class _OrderState extends State<Order> {
               height: 20.0,
             ),
             GestureDetector(
-              onTap: ()async{
-                int amount= int.parse(wallet!)-amount2;
-                await DatabaseMethods().UpdateUserwallet(id!, amount.toString());
-                await SharedPreferenceHelper().saveUserWallet(amount.toString());
+              onTap: () async {
+                int cartTotal = amount2;
+
+                if (cartTotal == 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.orange,
+                      content: Text(
+                        "Giỏ hàng trống. Vui lòng thêm món ăn!",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                // Đọc số dư THỰC TẾ từ Firestore thay vì SharedPreference
+                int walletBalance = await _walletService.getCurrentBalance();
+
+                if (walletBalance < cartTotal) {
+                  // Số dư không đủ
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.redAccent,
+                      content: Text(
+                        "Số dư không đủ (${walletBalance.toStringAsFixed(0)} VND). Vui lòng nạp thêm để tiếp tục!",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                } else {
+                  // Đủ tiền → trừ tiền qua WalletService
+                  bool success = await _walletService.deductBalance(
+                    amount: cartTotal,
+                    orderId: "order_${DateTime.now().millisecondsSinceEpoch}",
+                  );
+                  if (!mounted) return;
+                  if (success) {
+                    // Xóa giỏ hàng sau khi thanh toán thành công
+                    await DatabaseMethods().clearFoodCart(id!);
+                    int newBalance = walletBalance - cartTotal;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.green,
+                        content: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.white),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "Đặt hàng thành công! Số dư còn lại: ${newBalance} VND",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ],
+                        ),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text(
+                          "Đặt hàng thất bại. Vui lòng thử lại!",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
+
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 10.0),
                 width: MediaQuery.of(context).size.width,

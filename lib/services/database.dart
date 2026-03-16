@@ -62,6 +62,17 @@ class DatabaseMethods {
         .snapshots();
   }
 
+  Future<void> clearFoodCart(String id) async {
+    final cartRef = FirebaseFirestore.instance
+        .collection("users")
+        .doc(id)
+        .collection("Cart");
+    final snapshots = await cartRef.get();
+    for (final doc in snapshots.docs) {
+      await doc.reference.delete();
+    }
+  }
+
   Future<void> updateFoodItem(String category, String id, Map<String, dynamic> updatedInfo) async {
     await FirebaseFirestore.instance
         .collection(category)
