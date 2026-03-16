@@ -55,7 +55,7 @@ class _ViewTransactionsState extends State<ViewTransactions> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "Lỗi tải dữ liệu. Bạn hãy check Console.\nFirebase có thể yêu cầu tạo Index cho Collection Group Query.\n\nChi tiết lỗi:\n${snapshot.error}",
+                        "Lỗi tải dữ liệu: ${snapshot.error}",
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.red),
                       ),
@@ -65,20 +65,27 @@ class _ViewTransactionsState extends State<ViewTransactions> {
               );
             }
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            // Lọc các giao dịch nạp tiền (deposit) tại máy khách (để tránh lỗi Index của Firebase)
+            final allDocs = snapshot.data!.docs;
+            final depositDocs = allDocs.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return data['type'] == 'deposit';
+            }).toList();
+
+            if (depositDocs.isEmpty) {
               return const Center(
                 child: Text(
-                  "Không có bất kỳ giao dịch nào.",
+                  "Không có bất kỳ giao dịch nạp tiền nào.",
                   style: TextStyle(fontSize: 18),
                 ),
               );
             }
 
             return ListView.builder(
-              itemCount: snapshot.data!.docs.length,
+              itemCount: depositDocs.length,
               itemBuilder: (context, index) {
                 var data =
-                    snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                    depositDocs[index].data() as Map<String, dynamic>;
 
                 int amount = data['amount'] ?? 0;
                 String type =

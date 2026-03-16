@@ -240,7 +240,25 @@ class _OrderState extends State<Order> {
                   );
                   if (!mounted) return;
                   if (success) {
-                    // Xóa giỏ hàng sau khi thanh toán thành công
+                    // Lưu đơn hàng vào Firestore trước khi xóa giỏ
+                    final cartRef = FirebaseFirestore.instance
+                        .collection("users")
+                        .doc(id!)
+                        .collection("Cart");
+                    final cartSnapshot = await cartRef.get();
+                    List<Map<String, dynamic>> items = cartSnapshot.docs
+                        .map((doc) => doc.data())
+                        .toList();
+
+                    await DatabaseMethods().saveOrder({
+                      "userId": id,
+                      "items": items,
+                      "totalAmount": cartTotal,
+                      "status": "completed",
+                      "createdAt": DateTime.now().toIso8601String(),
+                    });
+
+                    // Xóa giỏ hàng sau khi đã lưu đơn hàng
                     await DatabaseMethods().clearFoodCart(id!);
                     int newBalance = walletBalance - cartTotal;
                     ScaffoldMessenger.of(context).showSnackBar(
