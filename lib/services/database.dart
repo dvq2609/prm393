@@ -84,6 +84,13 @@ class DatabaseMethods {
         .snapshots();
   }
 
+  Future<Stream<QuerySnapshot>> getUserOrders(String userId) async {
+    return FirebaseFirestore.instance
+        .collection("orders")
+        .where("userId", isEqualTo: userId)
+        .snapshots();
+  }
+
   Future<void> updateFoodItem(String category, String id, Map<String, dynamic> updatedInfo) async {
     await FirebaseFirestore.instance
         .collection(category)
