@@ -75,12 +75,9 @@ class _LoginState extends State<Login> {
             Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 2.5,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFff5c30), Color(0xFFe74b1a)],
-                ),
+              decoration: const BoxDecoration(
+                  color: Color(0xFFF37d1e),
+
               ),
             ),
             Container(
@@ -103,8 +100,9 @@ class _LoginState extends State<Login> {
                 Container(
                   margin: EdgeInsets.only(top: 90, left: 15),
                   child: Image.asset(
-                    "images/logo.png",
-                    width: MediaQuery.of(context).size.height / 2.5,
+                    "images/logo.jpg",
+
+                    width: MediaQuery.of(context).size.height / 3.5,
                     fit: BoxFit.cover,
                   ),
                 ),
