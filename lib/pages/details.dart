@@ -6,12 +6,16 @@ import 'dart:convert';
 
 class Details extends StatefulWidget {
   String name, price, image, detail;
+  List<dynamic>? sizes;
+  List<dynamic>? toppings;
   Details({
     Key? key,
     required this.name,
     required this.price,
     required this.image,
     required this.detail,
+    this.sizes,
+    this.toppings,
   }) : super(key: key);
   // Details({ required this.name, required this.price, required this.image, required this.detail});
 
@@ -23,8 +27,12 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> {
-  int a = 1, total = 0;
+  int a = 1, basePrice = 0, total = 0;
   String? id;
+
+  int selectedSizeIndex = 0;
+  List<bool> selectedToppings = [];
+  TextEditingController noteController = TextEditingController();
 
   getthesharedpref() async {
     id = await SharedPreferenceHelper().getUserId();
@@ -40,18 +48,38 @@ class _DetailsState extends State<Details> {
   void initState() {
     super.initState();
     ontheload();
-    total = int.parse(widget.price);
+    basePrice = int.parse(widget.price);
+    if (widget.toppings != null) {
+      selectedToppings = List.generate(widget.toppings!.length, (index) => false);
+    }
+    _calculateTotal();
+  }
+
+  void _calculateTotal() {
+    int optionsTotal = 0;
+    if (widget.sizes != null && widget.sizes!.isNotEmpty && selectedSizeIndex >= 0 && selectedSizeIndex < widget.sizes!.length) {
+      optionsTotal += int.parse(widget.sizes![selectedSizeIndex]["Price"].toString());
+    }
+    if (widget.toppings != null && widget.toppings!.isNotEmpty) {
+      for (int i = 0; i < widget.toppings!.length; i++) {
+        if (selectedToppings[i]) {
+          optionsTotal += int.parse(widget.toppings![i]["Price"].toString());
+        }
+      }
+    }
+    total = (basePrice + optionsTotal) * a;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: EdgeInsets.only(top: 50, left: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.only(top: 50, left: 20, right: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
               onTap: () {
                 Navigator.pop(context);
               },
@@ -99,10 +127,9 @@ class _DetailsState extends State<Details> {
                   onTap: () {
                     if (a > 1) {
                       --a;
-                      total = total - int.parse(widget.price);
+                      _calculateTotal();
+                      setState(() {});
                     }
-
-                    setState(() {});
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -118,10 +145,8 @@ class _DetailsState extends State<Details> {
                 GestureDetector(
                   onTap: () {
                     ++a;
-                    total=total+int.parse(widget.price);
-                    setState(() {
-
-                    });
+                    _calculateTotal();
+                    setState(() {});
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -149,7 +174,83 @@ class _DetailsState extends State<Details> {
                 Text("30 minutes", style: AppWidget.boldTextFieldStyle()),
               ],
             ),
-            SizedBox(height: 100),
+            SizedBox(height: 20),
+
+            // Sizes section
+            if (widget.sizes != null && widget.sizes!.isNotEmpty) ...[
+              Text("Choose Size", style: AppWidget.SemiBoldTextFieldStyle()),
+              SizedBox(height: 10),
+              ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: widget.sizes!.length,
+                itemBuilder: (context, index) {
+                  return RadioListTile<int>(
+                    title: Text(widget.sizes![index]["Name"]),
+                    subtitle: Text("+ \$${widget.sizes![index]["Price"]}"),
+                    value: index,
+                    groupValue: selectedSizeIndex,
+                    activeColor: Colors.black,
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedSizeIndex = value!;
+                        _calculateTotal();
+                      });
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: 20),
+            ],
+
+            // Toppings section
+            if (widget.toppings != null && widget.toppings!.isNotEmpty) ...[
+              Text("Extra Toppings", style: AppWidget.SemiBoldTextFieldStyle()),
+              SizedBox(height: 10),
+              ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: widget.toppings!.length,
+                itemBuilder: (context, index) {
+                  return CheckboxListTile(
+                    title: Text(widget.toppings![index]["Name"]),
+                    subtitle: Text("+ \$${widget.toppings![index]["Price"]}"),
+                    value: selectedToppings[index],
+                    activeColor: Colors.black,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        selectedToppings[index] = value!;
+                        _calculateTotal();
+                      });
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: 20),
+            ],
+
+            // Note section
+            Text("Special Instructions", style: AppWidget.SemiBoldTextFieldStyle()),
+            SizedBox(height: 10),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              decoration: BoxDecoration(
+                color: Color(0xFFececf8),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                controller: noteController,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "E.g. No onions, extra spicy",
+                  hintStyle: AppWidget.LightTextFieldStyle(),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 40),
 
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
@@ -172,11 +273,35 @@ class _DetailsState extends State<Details> {
 
                   GestureDetector(
                     onTap: () async {
+                      String customNote = noteController.text.trim();
+                      String optionsStr = "";
+                      
+                      if (widget.sizes != null && widget.sizes!.isNotEmpty) {
+                        optionsStr += "Size: ${widget.sizes![selectedSizeIndex]["Name"]}";
+                      }
+                      
+                      if (widget.toppings != null && widget.toppings!.isNotEmpty) {
+                        List<String> chosenToppings = [];
+                        for (int i = 0; i < selectedToppings.length; i++) {
+                          if (selectedToppings[i]) {
+                            chosenToppings.add(widget.toppings![i]["Name"]);
+                          }
+                        }
+                        if (chosenToppings.isNotEmpty) {
+                          optionsStr += (optionsStr.isEmpty ? "" : " | ") + "Toppings: " + chosenToppings.join(", ");
+                        }
+                      }
+                      
+                      if (customNote.isNotEmpty) {
+                        optionsStr += (optionsStr.isEmpty ? "" : " | ") + "Note: " + customNote;
+                      }
+
                       Map<String, dynamic> addFoodtoCard = {
                         "Name": widget.name,
                         "Quantity": a.toString(),
                         "Total": total.toString(),
                         "Image": widget.image,
+                        "Options": optionsStr,
                       };
                       await DatabaseMethods().AddFoodtoCart(addFoodtoCard, id!);
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -226,6 +351,7 @@ class _DetailsState extends State<Details> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

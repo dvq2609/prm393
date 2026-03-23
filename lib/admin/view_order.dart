@@ -206,18 +206,37 @@ class _ViewOrderState extends State<ViewOrder> {
                             horizontal: 16, vertical: 6),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.fastfood_outlined,
-                                    size: 16, color: Colors.grey),
-                                const SizedBox(width: 8),
-                                Text(
-                                  item["Name"] ?? "",
-                                  style: AppWidget.SemiBoldTextFieldStyle(),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.fastfood_outlined,
+                                            size: 16, color: Colors.grey),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            item["Name"] ?? "",
+                                            style: AppWidget.SemiBoldTextFieldStyle(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if ((item as Map<String, dynamic>).containsKey("Options") && item["Options"].toString().isNotEmpty) ...[
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 24, top: 4),
+                                        child: Text(
+                                          item["Options"],
+                                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontFamily: "Poppins"),
+                                        ),
+                                      ),
+                                    ]
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
                             Row(
                               children: [
                                 Text(
