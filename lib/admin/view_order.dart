@@ -190,17 +190,25 @@ class _ViewOrderState extends State<ViewOrder> {
                             decoration: BoxDecoration(
                               color: status == "completed"
                                   ? Colors.green.shade100
-                                  : Colors.orange.shade100,
+                                  : status == "delivering" 
+                                      ? Colors.blue.shade100 
+                                      : Colors.orange.shade100,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              status == "completed" ? "✅ Hoàn thành" : status,
+                                status == "completed"
+                                    ? "✅ Hoàn thành"
+                                    : status == "delivering"
+                                        ? "🚚 Đang giao"
+                                        : "⏳ Đang chờ",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: status == "completed"
                                     ? Colors.green.shade700
-                                    : Colors.orange.shade700,
+                                    : status == "delivering"
+                                        ? Colors.blue.shade700
+                                        : Colors.orange.shade700,
                                 fontFamily: "Poppins",
                               ),
                             ),
@@ -284,82 +292,116 @@ class _ViewOrderState extends State<ViewOrder> {
                       );
                     }).toList(),
                     const SizedBox(height: 8),
-                    if (data["deliveryLat"] != null &&
-                        data["deliveryLng"] != null)
+                    if (status == "pending")
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         child: SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.directions_bike),
-                            label: const Text(
-                              "Giao đơn này (Theo dõi lộ trình)",
-                            ),
+                          child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.blueAccent,
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 12)
                             ),
                             onPressed: () async {
-                              // Mặc định FPT Hà Nội nếu mất GPS
-                              LatLng shipperPosition = const LatLng(
-                                21.0131,
-                                105.5271,
-                              );
-                              final double lat = data["deliveryLat"] is int
-                                  ? (data["deliveryLat"] as int).toDouble()
-                                  : data["deliveryLat"];
-                              final double lng = data["deliveryLng"] is int
-                                  ? (data["deliveryLng"] as int).toDouble()
-                                  : data["deliveryLng"];
-
-                              bool serviceEnabled =
-                                  await Geolocator.isLocationServiceEnabled();
-                              if (serviceEnabled) {
-                                LocationPermission permission =
-                                    await Geolocator.checkPermission();
-                                if (permission == LocationPermission.denied) {
-                                  permission =
-                                      await Geolocator.requestPermission();
-                                }
-                                if (permission != LocationPermission.denied &&
-                                    permission !=
-                                        LocationPermission.deniedForever) {
-                                  try {
-                                    Position position =
-                                        await Geolocator.getCurrentPosition(
-                                          desiredAccuracy:
-                                              LocationAccuracy.high,
-                                        ).timeout(const Duration(seconds: 5));
-                                    shipperPosition = LatLng(
-                                      position.latitude,
-                                      position.longitude,
-                                    );
-                                  } catch (e) {
-                                    // Bỏ qua lỗi timeout
+                                double sLat = 21.0131; // Mặc định FPT
+                                double sLng = 105.5271;
+                                
+                                bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                                if (serviceEnabled) {
+                                  LocationPermission permission = await Geolocator.checkPermission();
+                                  if (permission == LocationPermission.denied) {
+                                    permission = await Geolocator.requestPermission();
+                                  }
+                                  if (permission != LocationPermission.denied && permission != LocationPermission.deniedForever) {
+                                    try {
+                                      Position position = await Geolocator.getCurrentPosition(
+                                        desiredAccuracy: LocationAccuracy.high,
+                                      ).timeout(const Duration(seconds: 5));
+                                      sLat = position.latitude;
+                                      sLng = position.longitude;
+                                    } catch (_) {}
                                   }
                                 }
-                              }
 
-                              if (context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => OrderTrackingPage(
-                                      customerLocation: LatLng(lat, lng),
-                                      shipperLocation:
-                                          shipperPosition, // Lấy chính xác vị trí máy Admin
-                                    ),
-                                  ),
-                                );
-                              }
+                                await FirebaseFirestore.instance.collection("orders").doc(orders[index].id).update({
+                                  "status": "delivering",
+                                  "shipperLat": sLat,
+                                  "shipperLng": sLng,
+                                });
                             },
+                            child: const Text("Tiếp nhận & Bắt đầu giao"),
                           ),
                         ),
                       ),
+                    if (status == "delivering" && data["deliveryLat"] != null && data["deliveryLng"] != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.directions_bike),
+                                label: const Text("Bản đồ", style: TextStyle(fontSize: 13)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12)
+                                ),
+                                onPressed: () async {
+                                  LatLng shipperPosition = const LatLng(21.0131, 105.5271);
+                                  final double lat = data["deliveryLat"] is int ? (data["deliveryLat"] as int).toDouble() : data["deliveryLat"];
+                                  final double lng = data["deliveryLng"] is int ? (data["deliveryLng"] as int).toDouble() : data["deliveryLng"];
+
+                                  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                                  if (serviceEnabled) {
+                                    LocationPermission permission = await Geolocator.checkPermission();
+                                    if (permission == LocationPermission.denied) {
+                                      permission = await Geolocator.requestPermission();
+                                    }
+                                    if (permission != LocationPermission.denied && permission != LocationPermission.deniedForever) {
+                                      try {
+                                        Position position = await Geolocator.getCurrentPosition(
+                                          desiredAccuracy: LocationAccuracy.high,
+                                        ).timeout(const Duration(seconds: 5));
+                                        shipperPosition = LatLng(position.latitude, position.longitude);
+                                      } catch (e) {
+                                        // Bỏ qua lỗi timeout
+                                      }
+                                    }
+                                  }
+
+                                  if (context.mounted) {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTrackingPage(
+                                      customerLocation: LatLng(lat, lng),
+                                      shipperLocation: shipperPosition,
+                                    )));
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 1,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12)
+                                ),
+                                onPressed: () async {
+                                  await FirebaseFirestore.instance.collection("orders").doc(orders[index].id).update({"status": "completed"});
+                                },
+                                child: const Text("Xác nhận xong", style: TextStyle(fontSize: 13)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                   ],
                 ),
               );

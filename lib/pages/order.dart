@@ -353,7 +353,7 @@ class _OrderState extends State<Order> {
                       "userId": id,
                       "items": items,
                       "totalAmount": cartTotal,
-                      "status": "completed",
+                      "status": "pending",
                       "deliveryLat": deliveryLocation!.latitude,
                       "deliveryLng": deliveryLocation!.longitude,
                       "createdAt": DateTime.now().toIso8601String(),
