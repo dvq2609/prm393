@@ -5,6 +5,7 @@ import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/pages/order_tracking.dart';
 import 'package:latlong2/latlong.dart';
+
 class OrderHistory extends StatefulWidget {
   const OrderHistory({super.key});
 
@@ -61,9 +62,7 @@ class _OrderHistoryState extends State<OrderHistory> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text("Lỗi tải dữ liệu: ${snapshot.error}"),
-            );
+            return Center(child: Text("Lỗi tải dữ liệu: ${snapshot.error}"));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -71,8 +70,11 @@ class _OrderHistoryState extends State<OrderHistory> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long_outlined,
-                      size: 80, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 80,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     "Bạn chưa có đơn hàng nào",
@@ -106,8 +108,11 @@ class _OrderHistoryState extends State<OrderHistory> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long_outlined,
-                      size: 80, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 80,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     "Bạn chưa có đơn hàng nào",
@@ -127,8 +132,7 @@ class _OrderHistoryState extends State<OrderHistory> {
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final data = orders[index].data() as Map<String, dynamic>;
-              final List items =
-                  (data["items"] as List<dynamic>?) ?? [];
+              final List items = (data["items"] as List<dynamic>?) ?? [];
               final String status = data["status"] ?? "unknown";
               final String date = _formatDate(data["createdAt"] ?? "");
               final int cartTotal = data["totalAmount"] ?? 0;
@@ -152,11 +156,14 @@ class _OrderHistoryState extends State<OrderHistory> {
                     // Header
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(14)),
+                          top: Radius.circular(14),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -172,22 +179,30 @@ class _OrderHistoryState extends State<OrderHistory> {
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: status == "completed"
                                   ? Colors.green.shade100
+                                  : status == "delivering"
+                                  ? Colors.blue.shade100
                                   : Colors.orange.shade100,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               status == "completed"
                                   ? "✅ Hoàn thành"
-                                  : status,
+                                  : status == "delivering"
+                                  ? "🚚 Đang giao"
+                                  : "⏳ Chờ xác nhận",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: status == "completed"
                                     ? Colors.green.shade700
+                                    : status == "delivering"
+                                    ? Colors.blue.shade700
                                     : Colors.orange.shade700,
                                 fontFamily: "Poppins",
                               ),
@@ -200,14 +215,19 @@ class _OrderHistoryState extends State<OrderHistory> {
                     ...items.map((item) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.fastfood_outlined,
-                                    size: 16, color: Colors.orange),
+                                const Icon(
+                                  Icons.fastfood_outlined,
+                                  size: 16,
+                                  color: Colors.orange,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   item["Name"] ?? "",
@@ -220,8 +240,9 @@ class _OrderHistoryState extends State<OrderHistory> {
                                 Text(
                                   "x${item["Quantity"]}",
                                   style: TextStyle(
-                                      color: Colors.grey.shade500,
-                                      fontFamily: "Poppins"),
+                                    color: Colors.grey.shade500,
+                                    fontFamily: "Poppins",
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
@@ -235,7 +256,12 @@ class _OrderHistoryState extends State<OrderHistory> {
                       );
                     }).toList(),
                     // Total Footer
-                    const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16),
+                    const Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
@@ -246,7 +272,7 @@ class _OrderHistoryState extends State<OrderHistory> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              fontFamily: "Poppins"
+                              fontFamily: "Poppins",
                             ),
                           ),
                           Text(
@@ -255,13 +281,15 @@ class _OrderHistoryState extends State<OrderHistory> {
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.orange,
-                              fontFamily: "Poppins"
+                              fontFamily: "Poppins",
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (data["deliveryLat"] != null && data["deliveryLng"] != null)
+                    if (status == "delivering" &&
+                        data["deliveryLat"] != null &&
+                        data["deliveryLng"] != null)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         child: SizedBox(
@@ -272,20 +300,44 @@ class _OrderHistoryState extends State<OrderHistory> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blueAccent,
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              padding: const EdgeInsets.symmetric(vertical: 12)
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             onPressed: () {
-                              final double lat = data["deliveryLat"] is int ? (data["deliveryLat"] as int).toDouble() : data["deliveryLat"];
-                              final double lng = data["deliveryLng"] is int ? (data["deliveryLng"] as int).toDouble() : data["deliveryLng"];
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTrackingPage(
-                                customerLocation: LatLng(lat, lng),
-                                shipperLocation: const LatLng(21.0264, 105.8037), // Dummy shipper (Hà Nội Center)
-                              )));
+                              final double lat = data["deliveryLat"] is int
+                                  ? (data["deliveryLat"] as int).toDouble()
+                                  : data["deliveryLat"];
+                              final double lng = data["deliveryLng"] is int
+                                  ? (data["deliveryLng"] as int).toDouble()
+                                  : data["deliveryLng"];
+
+                              // Nếu Admin đã lưu shipperLat/Lng (khi họ bấm Tiếp nhận) thì dùng
+                              double sLat = data["shipperLat"] != null
+                                  ? (data["shipperLat"] is int
+                                        ? (data["shipperLat"] as int).toDouble()
+                                        : data["shipperLat"])
+                                  : 21.0131;
+                              double sLng = data["shipperLng"] != null
+                                  ? (data["shipperLng"] is int
+                                        ? (data["shipperLng"] as int).toDouble()
+                                        : data["shipperLng"])
+                                  : 105.5271;
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => OrderTrackingPage(
+                                    customerLocation: LatLng(lat, lng),
+                                    shipperLocation: LatLng(sLat, sLng),
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),
-                      )
+                      ),
                   ],
                 ),
               );
