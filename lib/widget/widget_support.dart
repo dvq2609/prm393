@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class AppWidget {
   static TextStyle boldTextFieldStyle() {
     return TextStyle(
-      color: Colors.black,
       fontSize: 20,
       fontWeight: FontWeight.bold,
       fontFamily: 'Poppins',
@@ -11,7 +10,6 @@ class AppWidget {
   }
   static TextStyle HeadLineTextFieldStyle() {
     return TextStyle(
-      color: Colors.black,
       fontSize: 24,
       fontWeight: FontWeight.bold,
       fontFamily: 'Poppins',
@@ -19,7 +17,7 @@ class AppWidget {
   }
   static TextStyle LightTextFieldStyle() {
     return TextStyle(
-      color: Colors.black45,
+      color: Colors.grey, // Grey works on both dark and light
       fontSize: 15,
       fontWeight: FontWeight.w500,
       fontFamily: 'Poppins',
@@ -27,7 +25,6 @@ class AppWidget {
   }
   static TextStyle SemiBoldTextFieldStyle(){
     return TextStyle(
-      color: Colors.black,
       fontSize: 17,
       fontWeight: FontWeight.w500,
       fontFamily: 'Poppins',

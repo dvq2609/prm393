@@ -26,7 +26,6 @@ class _BottomNavState extends State<BottomNav> {
   late Profile profilePage;
 
   @override
-  @override
   void initState() {
     homePage = Home();
     walletPage = Wallet();
@@ -41,19 +40,18 @@ class _BottomNavState extends State<BottomNav> {
     return Scaffold(
       bottomNavigationBar: CurvedNavigationBar(
         height: 65,
-        backgroundColor: Colors.white,
-        color: Colors.black,
-        animationDuration: Duration(milliseconds: 500),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1F1F1F) : Colors.black,
+        animationDuration: const Duration(milliseconds: 500),
         onTap: (int index) {
           setState(() {
             currentIndex = index;
           });
         },
-        items: [
+        items: const [
           Icon(Icons.home, color: Colors.white),
           Icon(Icons.wallet, color: Colors.white),
           Icon(Icons.shopping_bag_outlined, color: Colors.white),
-
           Icon(Icons.person, color: Colors.white),
         ],
       ),

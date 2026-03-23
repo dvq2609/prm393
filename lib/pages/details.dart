@@ -224,56 +224,6 @@ class _DetailsState extends State<Details> {
                 ],
               ),
             ),
-                  Text("Total price", style: AppWidget.boldTextFieldStyle(),),
-                  Text("\$"+total.toString(), style: AppWidget.boldTextFieldStyle(),),
-                ],
-              ),
-              SizedBox(width: 150,),
-
-              GestureDetector(
-                ontap:()async {
-                  Map<String, dynamic> addFoodCart={
-                   "Name": widget.name,
-                    "Quantity": a.toString(),
-                    "Total": total.toString(),
-                    "Image": widget.image
-                  };
-
-                  await DatabaseMethods().addFoodToCart(addFoodtoCart, id!);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.redAccent,
-                      content: Text(
-                        "Added food to cart",
-                        style: AppWidget.boldTextFieldStyle(),
-                      ),
-                    ),
-                  );
-
-                },
-
-                width: MediaQuery.of(context).size/width/2,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text("Add to cart",style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold,fontFamily: "Poppins"),),
-                    SizedBox(width:30.0,),
-                    Container(
-                        child: Container(
-                            padding: EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                            )
-                            child: Icon(Icons.shopping_cart_outlined,color: Colors.white,)
-                        )
-                    )
-
-                    ]
-                ),
-              )
-            ],),)
-
           ],
         ),
       ),

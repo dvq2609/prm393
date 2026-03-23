@@ -258,7 +258,9 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF009688) : Colors.grey[300],
+          color: isSelected 
+              ? const Color(0xFF009688) 
+              : Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2A2A) : Colors.grey[300],
           borderRadius: BorderRadius.circular(8),
           border: isSelected
               ? Border.all(color: Colors.black12, width: 1)
@@ -267,7 +269,9 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
         child: Text(
           "${amount ~/ 1000}k",
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected 
+                ? Colors.white 
+                : Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black87,
             fontWeight: FontWeight.bold,
             fontFamily: "Poppins",
           ),
@@ -296,7 +300,11 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
                   const SizedBox(height: 20),
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    decoration: const BoxDecoration(color: Color(0xFFF2F2F2)),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF1E1E1E) 
+                          : const Color(0xFFF2F2F2),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Row(
                       children: [
@@ -378,7 +386,7 @@ class _WalletState extends State<Wallet> with WidgetsBindingObserver {
                         color: Color(0xFF009688),
                       ),
                       filled: true,
-                      fillColor: Colors.grey[100],
+                      fillColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2A2A) : Colors.grey[100],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
