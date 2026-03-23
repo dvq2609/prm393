@@ -50,6 +50,7 @@ class _HomeState extends State<Home> {
             DocumentSnapshot ds = allDocs[index];
             return GestureDetector(
               onTap: () {
+                Map<String, dynamic> data = ds.data() as Map<String, dynamic>;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -58,6 +59,8 @@ class _HomeState extends State<Home> {
                       price: ds["Price"],
                       image: ds["Image"],
                       detail: ds["Detail"],
+                      sizes: data.containsKey("Sizes") ? data["Sizes"] : null,
+                      toppings: data.containsKey("Toppings") ? data["Toppings"] : null,
                     ),
                   ),
                 );

@@ -29,6 +29,27 @@ class _AddFoodState extends State<AddFood> {
   final ImagePicker _picker = ImagePicker();
   File? selectedImage;
 
+  List<Map<String, TextEditingController>> sizesControllers = [];
+  List<Map<String, TextEditingController>> toppingsControllers = [];
+
+  void addSizeItem() {
+    setState(() {
+      sizesControllers.add({
+        "Name": TextEditingController(),
+        "Price": TextEditingController(text: "0"),
+      });
+    });
+  }
+
+  void addToppingItem() {
+    setState(() {
+      toppingsControllers.add({
+        "Name": TextEditingController(),
+        "Price": TextEditingController(text: "0"),
+      });
+    });
+  }
+
   Future getImage() async {
     var image = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -70,11 +91,23 @@ class _AddFoodState extends State<AddFood> {
         downloadUrl = selectedAssetImage!;
       }
 
+      List<Map<String, String>> sizesList = sizesControllers.map((e) => {
+        "Name": e["Name"]!.text,
+        "Price": e["Price"]!.text,
+      }).where((e) => e["Name"]!.isNotEmpty).toList();
+
+      List<Map<String, String>> toppingsList = toppingsControllers.map((e) => {
+        "Name": e["Name"]!.text,
+        "Price": e["Price"]!.text,
+      }).where((e) => e["Name"]!.isNotEmpty).toList();
+
       Map<String, dynamic> addItem = {
         "Image": downloadUrl,
         "Name": namecontroller.text,
         "Price": pricecontroller.text,
         "Detail": detailcontroller.text,
+        "Sizes": sizesList,
+        "Toppings": toppingsList
       };
 
       await DatabaseMethods().addFoodItem(addItem, value!).then((value) {
@@ -92,6 +125,8 @@ class _AddFoodState extends State<AddFood> {
         namecontroller.clear();
         pricecontroller.clear();
         detailcontroller.clear();
+        sizesControllers.clear();
+        toppingsControllers.clear();
         setState(() {
           selectedImage = null;
           selectedAssetImage = null;
@@ -168,6 +203,85 @@ class _AddFoodState extends State<AddFood> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDynamicOptions(String title, List<Map<String, TextEditingController>> controllers, VoidCallback onAdd) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: AppWidget.SemiBoldTextFieldStyle()),
+            IconButton(
+              icon: Icon(Icons.add_circle, color: Colors.black),
+              onPressed: onAdd,
+            )
+          ],
+        ),
+        SizedBox(height: 10.0),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: controllers.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFececf8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        controller: controllers[index]["Name"],
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Name",
+                          hintStyle: AppWidget.LightTextFieldStyle(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFececf8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        controller: controllers[index]["Price"],
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Price",
+                          hintStyle: AppWidget.LightTextFieldStyle(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.remove_circle, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        controllers.removeAt(index);
+                      });
+                    },
+                  )
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -362,6 +476,10 @@ class _AddFoodState extends State<AddFood> {
                   ),
                 ),
               ),
+              SizedBox(height: 30.0),
+              _buildDynamicOptions("Sizes", sizesControllers, addSizeItem),
+              SizedBox(height: 20.0),
+              _buildDynamicOptions("Toppings", toppingsControllers, addToppingItem),
               SizedBox(height: 30.0),
               GestureDetector(
                 onTap: () {

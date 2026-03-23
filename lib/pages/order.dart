@@ -74,8 +74,31 @@ class _OrderState extends State<Order> {
               scrollDirection: Axis.vertical,
               itemBuilder: (context, index) {
                 DocumentSnapshot ds = snapshot.data.docs[index];
-                total= total+ int.parse(ds["Total"]);
-                return Container(
+                total = total + int.parse(ds["Total"]);
+                return Dismissible(
+                  key: Key(ds.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 20.0),
+                    margin: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 10.0),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.delete_outline, color: Colors.white, size: 30),
+                  ),
+                  onDismissed: (_) async {
+                    await DatabaseMethods().removeCartItem(id!, ds.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("${ds["Name"]} đã bị xóa khỏi giỏ hàng"),
+                        backgroundColor: Colors.redAccent,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: Container(
                   margin: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 10.0),
                   child: Material(
                     elevation: 5.0,
@@ -126,7 +149,7 @@ class _OrderState extends State<Order> {
                                       ),
                           ),
                           SizedBox(width: 12.0),
-                          // Name + Price
+                          // Name + Options + Price
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,6 +160,15 @@ class _OrderState extends State<Order> {
                                   style: AppWidget.SemiBoldTextFieldStyle(),
                                   overflow: TextOverflow.ellipsis,
                                 ),
+                                if ((ds.data() as Map<String, dynamic>).containsKey("Options") && ds["Options"].toString().isNotEmpty) ...[
+                                  SizedBox(height: 4),
+                                  Text(
+                                    ds["Options"],
+                                    style: TextStyle(fontSize: 12, color: Colors.grey, fontFamily: "Poppins"),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                                 SizedBox(height: 4),
                                 Text(
                                   "\$" + ds["Total"],
@@ -145,11 +177,27 @@ class _OrderState extends State<Order> {
                               ],
                             ),
                           ),
+                          // Delete button
+                          IconButton(
+                            icon: Icon(Icons.delete_outline, color: Colors.redAccent),
+                            onPressed: () async {
+                              await DatabaseMethods().removeCartItem(id!, ds.id);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("${ds["Name"]} đã bị xóa khỏi giỏ hàng"),
+                                    backgroundColor: Colors.redAccent,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                         ],
                       ),
                     ),
                   ),
-                );
+                ));
               })
               : CircularProgressIndicator();
         });
