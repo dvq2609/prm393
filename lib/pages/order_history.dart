@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:prm393/services/database.dart';
 import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
-
+import 'package:prm393/pages/order_tracking.dart';
+import 'package:latlong2/latlong.dart';
 class OrderHistory extends StatefulWidget {
   const OrderHistory({super.key});
 
@@ -260,6 +261,31 @@ class _OrderHistoryState extends State<OrderHistory> {
                         ],
                       ),
                     ),
+                    if (data["deliveryLat"] != null && data["deliveryLng"] != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.map, size: 20),
+                            label: const Text("Theo dõi lộ trình giao hàng"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 12)
+                            ),
+                            onPressed: () {
+                              final double lat = data["deliveryLat"] is int ? (data["deliveryLat"] as int).toDouble() : data["deliveryLat"];
+                              final double lng = data["deliveryLng"] is int ? (data["deliveryLng"] as int).toDouble() : data["deliveryLng"];
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTrackingPage(
+                                customerLocation: LatLng(lat, lng),
+                                shipperLocation: const LatLng(21.0264, 105.8037), // Dummy shipper (Hà Nội Center)
+                              )));
+                            },
+                          ),
+                        ),
+                      )
                   ],
                 ),
               );
