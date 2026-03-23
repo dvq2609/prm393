@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/services/database.dart';
 import 'package:prm393/services/shared_pref.dart';
+import 'package:prm393/pages/food_reviews.dart';
 import 'dart:convert';
 
 class Details extends StatefulWidget {
@@ -32,6 +33,9 @@ class _DetailsState extends State<Details> {
 
   int selectedSizeIndex = 0;
   List<bool> selectedToppings = [];
+
+  double avgRating = 0;
+  int reviewCount = 0;
   TextEditingController noteController = TextEditingController();
 
   getthesharedpref() async {
@@ -41,6 +45,7 @@ class _DetailsState extends State<Details> {
 
   ontheload() async {
     await getthesharedpref();
+    await _loadReviewStats();
     setState(() {});
   }
 
@@ -53,6 +58,23 @@ class _DetailsState extends State<Details> {
       selectedToppings = List.generate(widget.toppings!.length, (index) => false);
     }
     _calculateTotal();
+  }
+
+  Future<void> _loadReviewStats() async {
+    final stream = await DatabaseMethods().getReviewsByFoodName(widget.name);
+    stream.listen((snapshot) {
+      if (mounted) {
+        double sum = 0;
+        for (final doc in snapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          sum += (data["rating"] ?? 0) as int;
+        }
+        setState(() {
+          reviewCount = snapshot.docs.length;
+          avgRating = reviewCount > 0 ? sum / reviewCount : 0;
+        });
+      }
+    });
   }
 
   void _calculateTotal() {
@@ -173,6 +195,61 @@ class _DetailsState extends State<Details> {
                 Icon(Icons.alarm, color: Colors.black45),
                 Text("30 minutes", style: AppWidget.boldTextFieldStyle()),
               ],
+            ),
+            SizedBox(height: 15),
+
+            // Review summary section
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        FoodReviewsPage(foodName: widget.name),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border:
+                      Border.all(color: Colors.orange.shade200, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Row(
+                      children: List.generate(
+                        5,
+                        (i) => Icon(
+                          i < avgRating.round()
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      reviewCount > 0
+                          ? "${avgRating.toStringAsFixed(1)} ($reviewCount đánh giá)"
+                          : "Chưa có đánh giá",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: Colors.orange.shade800,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.chevron_right,
+                        color: Colors.orange.shade800, size: 22),
+                  ],
+                ),
+              ),
             ),
             SizedBox(height: 20),
 

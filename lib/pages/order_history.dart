@@ -4,6 +4,7 @@ import 'package:prm393/services/database.dart';
 import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/pages/order_tracking.dart';
+import 'package:prm393/pages/order_review.dart';
 import 'package:latlong2/latlong.dart';
 
 class OrderHistory extends StatefulWidget {
@@ -334,6 +335,51 @@ class _OrderHistoryState extends State<OrderHistory> {
                                   ),
                                 ),
                               );
+                            },
+                          ),
+                        ),
+                      ),
+                    if (status == "completed")
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: Icon(
+                              data["reviewed"] == true
+                                  ? Icons.visibility
+                                  : Icons.rate_review_outlined,
+                              size: 20,
+                            ),
+                            label: Text(
+                              data["reviewed"] == true
+                                  ? "Xem đánh giá"
+                                  : "Đánh giá",
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: data["reviewed"] == true
+                                  ? Colors.grey.shade600
+                                  : Colors.orange,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => OrderReviewPage(
+                                    orderId: orders[index].id,
+                                    items: items,
+                                  ),
+                                ),
+                              );
+                              if (result == true) {
+                                setState(() {});
+                              }
                             },
                           ),
                         ),
