@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:prm393/services/audio_manager.dart';
 import 'package:prm393/theme.dart';
 import 'package:prm393/services/theme_manager.dart';
 import 'package:prm393/pages/bottom_nav.dart';
@@ -13,6 +14,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await ThemeManager.init();
+
+  // Khởi tạo và phát nhạc nền
+  await AudioManager().initBackgroundMusic();
+  AudioManager().playBackgroundMusic();
+
   runApp(const MyApp());
 }
 
