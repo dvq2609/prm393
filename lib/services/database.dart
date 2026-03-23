@@ -121,4 +121,39 @@ class DatabaseMethods {
         .collection('Cart')
         .add(userInfoMap);
   }
+
+  // ===== Review Methods =====
+
+  Future<void> saveReview(Map<String, dynamic> reviewData) async {
+    await FirebaseFirestore.instance.collection("reviews").add(reviewData);
+  }
+
+  Future<QuerySnapshot> getOrderReviews(String orderId) async {
+    return await FirebaseFirestore.instance
+        .collection("reviews")
+        .where("orderId", isEqualTo: orderId)
+        .get();
+  }
+
+  Future<Stream<QuerySnapshot>> getReviewsByFoodName(String foodName) async {
+    return FirebaseFirestore.instance
+        .collection("reviews")
+        .where("foodName", isEqualTo: foodName)
+        // Sort in memory to avoid needing composite indexes
+        .snapshots();
+  }
+
+  Future<void> updateReview(String docId, Map<String, dynamic> reviewData) async {
+    await FirebaseFirestore.instance
+        .collection("reviews")
+        .doc(docId)
+        .update(reviewData);
+  }
+
+  Future<void> updateOrderReviewed(String orderId) async {
+    await FirebaseFirestore.instance
+        .collection("orders")
+        .doc(orderId)
+        .update({"reviewed": true});
+  }
 }
