@@ -6,6 +6,7 @@ import 'package:prm393/pages/order_history.dart';
 import 'package:prm393/pages/wallet.dart';
 import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
+import 'package:prm393/services/audio_manager.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -16,6 +17,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   String? name, email, profile;
+  bool _isMusicEnabled = true;
 
   getthesharedpref() async {
     name = await SharedPreferenceHelper().getUserName();
@@ -27,6 +29,7 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     getthesharedpref();
+    _isMusicEnabled = AudioManager().isMusicEnabled;
     super.initState();
   }
 
@@ -143,6 +146,7 @@ class _ProfileState extends State<Profile> {
             ),
 
             _buildDarkModeToggle(context),
+            _buildMusicToggle(context),
 
             buildProfileOption(
               icon: Icons.logout_rounded,
@@ -206,6 +210,57 @@ class _ProfileState extends State<Profile> {
                       ThemeManager.changeTheme(value ? ThemeMode.dark : ThemeMode.light);
                     },
                   );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMusicToggle(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      child: Material(
+        borderRadius: BorderRadius.circular(20),
+        elevation: 3.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10.0,
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.music_note,
+                color: Colors.orange,
+                size: 28,
+              ),
+              const SizedBox(width: 20.0),
+              Expanded(
+                child: Text(
+                  "Nhạc nền",
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+              Switch(
+                value: _isMusicEnabled,
+                activeColor: Colors.orange,
+                onChanged: (value) {
+                  setState(() {
+                    _isMusicEnabled = value;
+                  });
+                  AudioManager().toggleMusic(value);
                 },
               ),
             ],
