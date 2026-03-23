@@ -8,7 +8,8 @@ import 'package:prm393/services/database.dart';
 import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/services/wallet_service.dart';
 import 'package:prm393/widget/widget_support.dart';
-
+import 'package:latlong2/latlong.dart';
+import 'package:prm393/pages/location_picker.dart';
 class Order extends StatefulWidget {
   const Order({super.key});
 
@@ -20,6 +21,7 @@ class _OrderState extends State<Order> {
   String? id;
   int total = 0, amount2 = 0;
   final WalletService _walletService = WalletService();
+  LatLng? deliveryLocation;
 
   Timer? _timer;
 
@@ -247,6 +249,42 @@ class _OrderState extends State<Order> {
             SizedBox(
               height: 20.0,
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      deliveryLocation != null 
+                        ? "Vị trí: ${deliveryLocation!.latitude.toStringAsFixed(4)}, ${deliveryLocation!.longitude.toStringAsFixed(4)}"
+                        : "Chưa chọn vị trí giao hàng",
+                      style: AppWidget.SemiBoldTextFieldStyle(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final LatLng? result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LocationPicker()),
+                      );
+                      if (result != null) {
+                        setState(() {
+                          deliveryLocation = result;
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                    child: Text(deliveryLocation == null ? "Chọn vị trí" : "Thay đổi", style: const TextStyle(color: Colors.white)),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 20.0,
+            ),
             GestureDetector(
               onTap: () async {
                 int cartTotal = amount2;
@@ -257,6 +295,19 @@ class _OrderState extends State<Order> {
                       backgroundColor: Colors.orange,
                       content: Text(
                         "Giỏ hàng trống. Vui lòng thêm món ăn!",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                if (deliveryLocation == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Colors.orange,
+                      content: Text(
+                        "Vui lòng chọn vị trí giao hàng!",
                         style: TextStyle(fontSize: 16),
                       ),
                     ),
@@ -303,6 +354,8 @@ class _OrderState extends State<Order> {
                       "items": items,
                       "totalAmount": cartTotal,
                       "status": "completed",
+                      "deliveryLat": deliveryLocation!.latitude,
+                      "deliveryLng": deliveryLocation!.longitude,
                       "createdAt": DateTime.now().toIso8601String(),
                     });
 
