@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:prm393/services/database.dart';
 import 'package:prm393/widget/widget_support.dart';
+import 'package:prm393/pages/order_tracking.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ViewOrder extends StatefulWidget {
   const ViewOrder({super.key});
@@ -54,9 +57,7 @@ class _ViewOrderState extends State<ViewOrder> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text("Lỗi tải dữ liệu: ${snapshot.error}"),
-            );
+            return Center(child: Text("Lỗi tải dữ liệu: ${snapshot.error}"));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -64,8 +65,11 @@ class _ViewOrderState extends State<ViewOrder> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long_outlined,
-                      size: 80, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 80,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     "Chưa có đơn hàng nào",
@@ -92,8 +96,11 @@ class _ViewOrderState extends State<ViewOrder> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long_outlined,
-                      size: 80, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 80,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     "Chưa có đơn hàng nào",
@@ -113,16 +120,15 @@ class _ViewOrderState extends State<ViewOrder> {
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final data = orders[index].data() as Map<String, dynamic>;
-              final List items =
-                  (data["items"] as List<dynamic>?) ?? [];
+              final List items = (data["items"] as List<dynamic>?) ?? [];
               final String status = data["status"] ?? "unknown";
               final String date = _formatDate(data["createdAt"] ?? "");
-              final String userId =
-                  (data["userId"] as String? ?? "").substring(
-                      0,
-                      (data["userId"] as String? ?? "").length > 8
-                          ? 8
-                          : (data["userId"] as String? ?? "").length);
+              final String userId = (data["userId"] as String? ?? "").substring(
+                0,
+                (data["userId"] as String? ?? "").length > 8
+                    ? 8
+                    : (data["userId"] as String? ?? "").length,
+              );
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -143,11 +149,14 @@ class _ViewOrderState extends State<ViewOrder> {
                     // Header
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(14)),
+                          top: Radius.circular(14),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -175,23 +184,31 @@ class _ViewOrderState extends State<ViewOrder> {
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: status == "completed"
                                   ? Colors.green.shade100
-                                  : Colors.orange.shade100,
+                                  : status == "delivering" 
+                                      ? Colors.blue.shade100 
+                                      : Colors.orange.shade100,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              status == "completed"
-                                  ? "✅ Hoàn thành"
-                                  : status,
+                                status == "completed"
+                                    ? "✅ Hoàn thành"
+                                    : status == "delivering"
+                                        ? "🚚 Đang giao"
+                                        : "⏳ Đang chờ",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: status == "completed"
                                     ? Colors.green.shade700
-                                    : Colors.orange.shade700,
+                                    : status == "delivering"
+                                        ? Colors.blue.shade700
+                                        : Colors.orange.shade700,
                                 fontFamily: "Poppins",
                               ),
                             ),
@@ -203,47 +220,65 @@ class _ViewOrderState extends State<ViewOrder> {
                     ...items.map((item) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 6),
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.fastfood_outlined,
-                                            size: 16, color: Colors.grey),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            item["Name"] ?? "",
-                                            style: AppWidget.SemiBoldTextFieldStyle(),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    if ((item as Map<String, dynamic>).containsKey("Options") && item["Options"].toString().isNotEmpty) ...[
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 24, top: 4),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.fastfood_outlined,
+                                        size: 16,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
                                         child: Text(
-                                          item["Options"],
-                                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontFamily: "Poppins"),
+                                          item["Name"] ?? "",
+                                          style:
+                                              AppWidget.SemiBoldTextFieldStyle(),
                                         ),
                                       ),
-                                    ]
+                                    ],
+                                  ),
+                                  if ((item as Map<String, dynamic>)
+                                          .containsKey("Options") &&
+                                      item["Options"]
+                                          .toString()
+                                          .isNotEmpty) ...[
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 24,
+                                        top: 4,
+                                      ),
+                                      child: Text(
+                                        item["Options"],
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                          fontFamily: "Poppins",
+                                        ),
+                                      ),
+                                    ),
                                   ],
-                                ),
+                                ],
                               ),
+                            ),
                             Row(
                               children: [
                                 Text(
                                   "x${item["Quantity"]}",
                                   style: TextStyle(
-                                      color: Colors.grey.shade500,
-                                      fontFamily: "Poppins"),
+                                    color: Colors.grey.shade500,
+                                    fontFamily: "Poppins",
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
@@ -257,7 +292,116 @@ class _ViewOrderState extends State<ViewOrder> {
                       );
                     }).toList(),
                     const SizedBox(height: 8),
+                    if (status == "pending")
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 12)
+                            ),
+                            onPressed: () async {
+                                double sLat = 21.0131; // Mặc định FPT
+                                double sLng = 105.5271;
+                                
+                                bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                                if (serviceEnabled) {
+                                  LocationPermission permission = await Geolocator.checkPermission();
+                                  if (permission == LocationPermission.denied) {
+                                    permission = await Geolocator.requestPermission();
+                                  }
+                                  if (permission != LocationPermission.denied && permission != LocationPermission.deniedForever) {
+                                    try {
+                                      Position position = await Geolocator.getCurrentPosition(
+                                        desiredAccuracy: LocationAccuracy.high,
+                                      ).timeout(const Duration(seconds: 5));
+                                      sLat = position.latitude;
+                                      sLng = position.longitude;
+                                    } catch (_) {}
+                                  }
+                                }
 
+                                await FirebaseFirestore.instance.collection("orders").doc(orders[index].id).update({
+                                  "status": "delivering",
+                                  "shipperLat": sLat,
+                                  "shipperLng": sLng,
+                                });
+                            },
+                            child: const Text("Tiếp nhận & Bắt đầu giao"),
+                          ),
+                        ),
+                      ),
+                    if (status == "delivering" && data["deliveryLat"] != null && data["deliveryLng"] != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.directions_bike),
+                                label: const Text("Bản đồ", style: TextStyle(fontSize: 13)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12)
+                                ),
+                                onPressed: () async {
+                                  LatLng shipperPosition = const LatLng(21.0131, 105.5271);
+                                  final double lat = data["deliveryLat"] is int ? (data["deliveryLat"] as int).toDouble() : data["deliveryLat"];
+                                  final double lng = data["deliveryLng"] is int ? (data["deliveryLng"] as int).toDouble() : data["deliveryLng"];
+
+                                  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                                  if (serviceEnabled) {
+                                    LocationPermission permission = await Geolocator.checkPermission();
+                                    if (permission == LocationPermission.denied) {
+                                      permission = await Geolocator.requestPermission();
+                                    }
+                                    if (permission != LocationPermission.denied && permission != LocationPermission.deniedForever) {
+                                      try {
+                                        Position position = await Geolocator.getCurrentPosition(
+                                          desiredAccuracy: LocationAccuracy.high,
+                                        ).timeout(const Duration(seconds: 5));
+                                        shipperPosition = LatLng(position.latitude, position.longitude);
+                                      } catch (e) {
+                                        // Bỏ qua lỗi timeout
+                                      }
+                                    }
+                                  }
+
+                                  if (context.mounted) {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTrackingPage(
+                                      customerLocation: LatLng(lat, lng),
+                                      shipperLocation: shipperPosition,
+                                    )));
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 1,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12)
+                                ),
+                                onPressed: () async {
+                                  await FirebaseFirestore.instance.collection("orders").doc(orders[index].id).update({"status": "completed"});
+                                },
+                                child: const Text("Xác nhận xong", style: TextStyle(fontSize: 13)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                   ],
                 ),
               );
