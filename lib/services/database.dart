@@ -105,7 +105,7 @@ class DatabaseMethods {
         .delete();
   }
 
-  Future addFoodToCart (Map<String, dynamic> userInforMap, String async){
+  Future addFoodToCart(Map<String, dynamic> userInfoMap, String id) async {
     return await FirebaseFirestore.instance
         .collection('users')
         .doc(id)

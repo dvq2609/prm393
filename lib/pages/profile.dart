@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:prm393/services/theme_manager.dart';
 import 'package:prm393/pages/login.dart';
 import 'package:prm393/pages/order_history.dart';
 import 'package:prm393/pages/wallet.dart';
@@ -32,7 +33,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -141,6 +142,8 @@ class _ProfileState extends State<Profile> {
               },
             ),
 
+            _buildDarkModeToggle(context),
+
             buildProfileOption(
               icon: Icons.logout_rounded,
               title: "Đăng xuất",
@@ -151,6 +154,62 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 40.0),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDarkModeToggle(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      child: Material(
+        borderRadius: BorderRadius.circular(20),
+        elevation: 3.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10.0,
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.dark_mode,
+                color: Colors.orange,
+                size: 28,
+              ),
+              const SizedBox(width: 20.0),
+              Expanded(
+                child: Text(
+                  "Chế độ Tối (Dark Mode)",
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: ThemeManager.themeNotifier,
+                builder: (context, currentMode, child) {
+                  final isDark = currentMode == ThemeMode.dark ||
+                      (currentMode == ThemeMode.system &&
+                          MediaQuery.of(context).platformBrightness == Brightness.dark);
+                  return Switch(
+                    value: isDark,
+                    activeColor: Colors.orange,
+                    onChanged: (value) {
+                      ThemeManager.changeTheme(value ? ThemeMode.dark : ThemeMode.light);
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -175,7 +234,7 @@ class _ProfileState extends State<Profile> {
               horizontal: 20.0,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -192,7 +251,7 @@ class _ProfileState extends State<Profile> {
                     style: TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.w600,
-                      color: isLogout ? Colors.red : Colors.black87,
+                      color: isLogout ? Colors.red : (Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black87),
                       fontFamily: 'Poppins',
                     ),
                   ),
