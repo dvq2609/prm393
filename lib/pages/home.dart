@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:prm393/services/database.dart';
 import 'package:prm393/widget/widget_support.dart';
 import 'package:prm393/pages/details.dart';
+import 'package:prm393/widget/ai_chat_modal.dart';
 import 'dart:convert';
 
 class Home extends StatefulWidget {
@@ -155,14 +156,24 @@ class _HomeState extends State<Home> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Home', style: AppWidget.boldTextFieldStyle()),
-                Container(
-                  margin: EdgeInsets.only(right: 20),
-                  padding: EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const AiChatBottomSheet(),
+                    );
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(right: 20),
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.auto_awesome, color: Colors.white),
                   ),
-                  child: Icon(Icons.shopping_cart, color: Colors.white),
                 ),
               ],
             ),
