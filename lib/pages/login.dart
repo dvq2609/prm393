@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:prm393/pages/bottom_nav.dart';
 import 'package:prm393/pages/forget_password.dart';
 import 'package:prm393/pages/sign_up.dart';
-import 'package:prm393/admin/admin_login.dart';
+import 'package:prm393/admin/home_admin.dart';
 import 'package:prm393/services/shared_pref.dart';
 import 'package:prm393/widget/widget_support.dart';
 
@@ -26,10 +26,18 @@ class _LoginState extends State<Login> {
 
   login() async {
     if (password.isNotEmpty) {
+      if (email == "admin@example.com" && password == "12345678") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeAdmin()),
+        );
+        return;
+      }
+
       try {
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
-        
+
         await SharedPreferenceHelper().saveUserId(userCredential.user!.uid);
         await SharedPreferenceHelper().saveUserEmail(email);
         // Note: Wallet might need a separate fetch if you want to store it locally here
@@ -75,10 +83,7 @@ class _LoginState extends State<Login> {
             Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 2.5,
-              decoration: const BoxDecoration(
-                  color: Color(0xFFF37d1e),
-
-              ),
+              decoration: const BoxDecoration(color: Color(0xFFF37d1e)),
             ),
             Container(
               margin: EdgeInsets.only(
@@ -232,38 +237,14 @@ class _LoginState extends State<Login> {
                       MaterialPageRoute(builder: (context) => SignUp()),
                     );
                   },
-                    child: Text(
-                      "Đăng kí tài khoản mới",
-                      style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
-                    ),
+                  child: Text(
+                    "Đăng kí tài khoản mới",
+                    style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
                   ),
-                  SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const AdminLogin()),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black26),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        "Đăng nhập với tư cách Quản trị viên",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

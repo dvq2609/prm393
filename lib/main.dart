@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:prm393/services/audio_manager.dart';
 import 'package:prm393/theme.dart';
 import 'package:prm393/services/theme_manager.dart';
@@ -12,6 +13,7 @@ import 'package:prm393/pages/wallet.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();
   await ThemeManager.init();
 

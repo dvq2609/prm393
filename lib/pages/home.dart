@@ -61,7 +61,9 @@ class _HomeState extends State<Home> {
                       image: ds["Image"],
                       detail: ds["Detail"],
                       sizes: data.containsKey("Sizes") ? data["Sizes"] : null,
-                      toppings: data.containsKey("Toppings") ? data["Toppings"] : null,
+                      toppings: data.containsKey("Toppings")
+                          ? data["Toppings"]
+                          : null,
                     ),
                   ),
                 );
@@ -155,7 +157,7 @@ class _HomeState extends State<Home> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Home', style: AppWidget.boldTextFieldStyle()),
+                Text('Trang chủ', style: AppWidget.boldTextFieldStyle()),
                 GestureDetector(
                   onTap: () {
                     showModalBottomSheet(
@@ -178,9 +180,8 @@ class _HomeState extends State<Home> {
               ],
             ),
             SizedBox(height: 20),
-            Text("Delicious Food", style: AppWidget.HeadLineTextFieldStyle()),
             Text(
-              "Discover and get great food",
+              "Khám phá và thưởng thức món ăn ngon",
               style: AppWidget.LightTextFieldStyle(),
             ),
             SizedBox(height: 20.0),

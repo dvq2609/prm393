@@ -1,9 +1,10 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 class GeminiAIService {
-  static const String _apiKey = 'AIzaSyAYbRHwG7Nf9p21OCUpH6cXunAHjrGZ2sw';
+  static final String _apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
   // Khởi tạo model
   late final GenerativeModel _model;
